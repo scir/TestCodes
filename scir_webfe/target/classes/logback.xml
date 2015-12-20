@@ -1,0 +1,45 @@
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+		</layout>
+	</appender>
+	
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/Applications/tomcat/logs/smartcity/smartcityapi.log</file>
+		
+		<!-- daily Roll-over -->
+        <!--rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>smartcityapi.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxIndex>1000</maxIndex>
+		</rollingPolicy-->
+            
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>smartcityapi.%i.log.zip</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>1000</maxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>50MB</maxFileSize>
+		</triggeringPolicy>
+		<encoder>
+			<pattern>%d{MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+    <logger name="org.springframework">
+    	<level value="WARNING" />
+    </logger>
+    <logger name="com.mchange">
+    	<level value="INFO" />
+    </logger>
+    <logger name="kk.cse">
+    	<level value="DEBUG" />
+    </logger>
+    
+	<root level="WARNING">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
+	</root>
+</log4j:configuration>

@@ -1,0 +1,66 @@
+package org.smartcity.web.api;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.smartcity.api.TicketAPI;
+import org.smartcity.entity.Ticket;
+import org.smartcity.exception.DatabaseException;
+import org.smartcity.exception.ValidationException;
+import org.smartcity.util.BeanFactory;
+import org.smartcity.valueobject.AddTicketResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+public class TicketHttpAPI {
+
+	private static Logger log = LoggerFactory.getLogger(TicketHttpAPI.class);
+	private TicketAPI ticketAPI = (TicketAPI) BeanFactory.getBean("ticketAPI");
+
+	@ExceptionHandler(Exception.class)
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.BAD_REQUEST)
+	public AddTicketResponse handleException(Exception e){
+		return new AddTicketResponse("1", "102", "Bad Request received. Kindly check the request parameters.");
+	}
+
+	@RequestMapping(value="/ticket/add.ws", method=RequestMethod.PUT)
+	public @ResponseBody AddTicketResponse addTicket(@RequestBody Ticket ticket){
+		log.info("addTicket called...");
+
+		AddTicketResponse resp = processRequest(ticket);
+		log.info("Returning response: " + resp + " for request: " + ticket);
+		return resp ;
+	}
+
+	private AddTicketResponse processRequest(Ticket ticket){
+		try {
+			log.info("Input Ticket: " + ticket);
+			
+			ticketAPI.validateTicket(ticket, true);
+			
+//			if (!ticketAPI.isValidRequest(ticket)){
+//				return new AddTicketResponse("1", "101", "Request is not valid. Kindly check the request parameters.");
+//			}
+			
+			ticketAPI.addTicket(ticket);
+			log.info("Ticket added successfully.");
+			return new AddTicketResponse("0", "0", "Ticket added with id: " + ticket.getTicketId(), String.valueOf(ticket.getTicketId()));
+			
+		} catch (ValidationException e) {
+			//log.error("Validation Exception: "+ e.getMessage());		// Already logged
+			return new AddTicketResponse("1", "101", "Unable to add Ticket. Please try again after some time.");
+		} catch (DatabaseException e) {
+			log.error("Unable to add Ticket: "+ e.getMessage(), e);
+			return new AddTicketResponse("1", "202", "Unable to add Ticket. Please try again after some time.");
+		} catch (Exception e) {
+			log.error("Unable to add Ticket: "+ e.getMessage(), e);
+			return new AddTicketResponse("1", "201", "Unable to add Ticket. Please try again after some time.");
+		}
+	}
+
+}

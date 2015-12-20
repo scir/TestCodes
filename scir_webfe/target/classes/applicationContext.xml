@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:lang="http://www.springframework.org/schema/lang"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <context:annotation-config />
+    
+	<bean id="beanFactory" class="org.smartcity.util.BeanFactory"></bean>
+	<util:properties id="appProperties" location="classpath:smartcity.properties" />
+   
+	<context:component-scan base-package="com.example" />
+
+	<!-- DAOs -->
+	<bean id="ticketDao" class="org.smartcity.dao.impl.TicketDaoImpl" >
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!--bean id="userDao" class="org.smartcity.dao.impl.UserDaoImpl" >
+		<property name="dataSource" ref="dataSource"></property>
+	</bean-->
+		
+	<!-- Services -->	
+	<bean id="ticketService" class="org.smartcity.service.impl.TicketServiceImpl">
+		<property name="ticketDao" ref="ticketDao"></property>
+	</bean>
+	<!--bean id="userService" class="org.smartcity.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"></property>
+	</bean-->
+	
+	<!-- Handler and API -->
+	<bean id="ticketAPI" class="org.smartcity.api.TicketAPI">
+		<property name="ticketService" ref="ticketService"></property>
+	</bean>
+	
+</beans>
