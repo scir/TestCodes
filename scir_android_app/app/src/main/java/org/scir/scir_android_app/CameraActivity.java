@@ -1,9 +1,14 @@
 package org.scir.scir_android_app;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.os.Environment;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -48,14 +54,97 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     };
 
+    private void SaveImage(Bitmap finalBitmap) {
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/saved_images");
+        myDir.mkdirs();
+        Random generator = new Random();
+        int n = 10000;
+        n = generator.nextInt(n);
+        String fname = "Image-"+ n +".jpg";
+        File file = new File (myDir, fname);
+        if (file.exists ()) file.delete ();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void SaveData() {
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/saved_data");
+        myDir.mkdirs();
+        Random generator = new Random();
+        int n = 10000, offset = 0;
+        String fname = "Image-"+ generator.nextInt(n) +".data";
+        File file = new File (myDir, fname);
+        if (file.exists ()) file.delete ();
+        try {
+            offset = mCameraData.length;
+            String myData = "Test Data";
+            FileOutputStream out = new FileOutputStream(file);
+            if( mCameraData != null ) {
+                out.write(mCameraData, 0, mCameraData.length);
+                out.write(myData.getBytes(), offset, myData.length());
+                offset+= myData.length();
+            }
+            myData = "Rest of fields";
+            out.write(myData.getBytes(), offset, myData.length());
+            offset += myData.length();
+
+
+            out.flush();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void handleSubmissions() {
+
+        if( mCameraData != null) {
+
+        }
+        /*
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("End Game?");
+        alertDialog.setMessage("Are you sure you wish to end the game?");
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        alertDialog.show();
+        */
+        SaveData();
+    }
+
+
     private OnClickListener mDoneButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
+            handleSubmissions();
             if (mCameraData != null) {
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
                 /* TODO : This is final processing stage of all submitted contents */
-                
+
                 setResult(RESULT_OK, intent);
             } else {
                 setResult(RESULT_CANCELED);

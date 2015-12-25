@@ -64,8 +64,6 @@ public class MainActivity extends Activity {
         mSaveImageButton = (Button) findViewById(R.id.save_image_button);
         mSaveImageButton.setOnClickListener(mSaveImageButtonClickListener);
         mSaveImageButton.setEnabled(false);
-
-        // imgLogo = new ImageView(MainActivity.this);
         imgLogo = (ImageView) findViewById(R.id.imageView);
         imgLogo.setImageResource(R.drawable.scir_image);
 
