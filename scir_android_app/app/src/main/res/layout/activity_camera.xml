@@ -35,7 +35,7 @@ android:orientation="vertical" >
 
         <Button
             android:id="@+id/capture_image_button"
-            android:layout_width="150dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/capture_image" />
     </LinearLayout>
@@ -46,7 +46,8 @@ android:orientation="vertical" >
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+            android:layout_gravity="center">
 
 
         <RadioGroup
@@ -86,27 +87,31 @@ android:orientation="vertical" >
     <RatingBar
         android:id="@+id/ratingBar1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
     <SeekBar
         android:id="@+id/seekBar1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/ratingBar1" />
+        android:layout_below="@+id/ratingBar1"
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:weightSum="1">
 
         <Button
             android:id="@+id/done_button"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="@string/done" />
+            android:text="@string/done"
+            android:layout_weight="0.34" />
     </LinearLayout>
 
 </LinearLayout>

@@ -32,6 +32,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private byte[] mCameraData;
     private boolean mIsCapturing;
 
+    private Button mReportScirFeedback;
+
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -52,6 +54,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             if (mCameraData != null) {
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
+                /* TODO : This is final processing stage of all submitted contents */
+                
                 setResult(RESULT_OK, intent);
             } else {
                 setResult(RESULT_CANCELED);
@@ -166,7 +170,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCameraImage.setVisibility(View.INVISIBLE);
         mCameraPreview.setVisibility(View.VISIBLE);
         mCamera.startPreview();
-        mCaptureImageButton.setText(R.string.capture_image);
+        mCaptureImageButton.setText(R.string.capture_image); // ToDo : Fix string in strings.xml
         mCaptureImageButton.setOnClickListener(mCaptureImageButtonClickListener);
     }
 
@@ -176,7 +180,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCamera.stopPreview();
         mCameraPreview.setVisibility(View.INVISIBLE);
         mCameraImage.setVisibility(View.VISIBLE);
-        mCaptureImageButton.setText(R.string.recapture_image);
+        mCaptureImageButton.setText(R.string.recapture_image); // ToDo : Fix string in strings.xml
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
 }

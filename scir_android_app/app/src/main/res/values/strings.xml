@@ -7,6 +7,6 @@
     <string name="save_image">See Reported Problems</string>
     <string name="recapture_image">Retake Picture</string>
     <string name="capturing_image">Taking New Picture</string>
-    <string name="done">Done</string>
+    <string name="done">Report SCIR Feedback</string>
 
 </resources>
