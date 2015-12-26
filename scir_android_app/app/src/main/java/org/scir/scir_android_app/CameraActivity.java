@@ -1,5 +1,6 @@
 package org.scir.scir_android_app;
 
+import android.media.ExifInterface;
 import android.os.Bundle;
 
 
@@ -45,17 +46,18 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private SeekBar mScirCtlSeveritySeekBar ;
     private Button mScirCtlButtonSubmitFeedback;
 
-    enum SCIR_PROBLEM_TYPE {
+    public enum SCIR_PROBLEM_TYPE {
         E_SCIR_WATER,
-        E_SCIR_ELECTRICITY,
+        E_SCIR_ELECTRICITY ,
         E_SCIR_ROAD,
-        E_SCIR_SANITATION,
-        E_SCIR_POLLUTION,
-        E_SCIR_OTHER };
+        E_SCIR_SANITATION ,
+        E_SCIR_POLLUTION ,
+        E_SCIR_OTHER
+    };
 
     private float mScirDataLat, mScirDataLong, mScirDataDateTime ;
     private float mScirDataProblemSeverityLevel;
-    private long mScirDataProblemType ;
+    private SCIR_PROBLEM_TYPE mScirDataProblemType ;
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
@@ -71,59 +73,38 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     };
 
-    private void SaveImage(Bitmap finalBitmap) {
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/saved_images");
-        myDir.mkdirs();
-        Random generator = new Random();
-        int n = 10000;
-        n = generator.nextInt(n);
-        String fname = "Image-"+ n +".jpg";
-        File file = new File (myDir, fname);
-        if (file.exists ()) file.delete ();
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            out.flush();
-            out.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void SaveData() {
         String root = Environment.getExternalStorageDirectory().toString();
         File myDir = new File(root + "/saved_data");
         myDir.mkdirs();
         Random generator = new Random();
+
         int n = 10000, offset = 0;
-        String fname = "Image-"+ generator.nextInt(n) +".data";
+        int number = generator.nextInt(n);
+        String fname = "Image-"+ number + ".dat";
         File file = new File (myDir, fname);
         if (file.exists ()) file.delete ();
         try {
             String myData = "Test Data";
             FileOutputStream out = new FileOutputStream(file);
-            /*
-            if( mCameraData != null ) {
-                offset = mCameraData.length;
-                out.write(mCameraData, 0, mCameraData.length);
-                // out.write(myData.getBytes(), offset, myData.length());
-                // offset+= myData.length();
-            }
-            */
-            /*
-            myData = String.format("Severity Level : %.3f\n", mScirDataProblemSeverityLevel);
+            myData = String.format("Severity Level : %.3f\nProblem Type : %s\n",
+                    mScirDataProblemSeverityLevel,
+                    mScirDataProblemType.toString()
+                    );
             out.write(myData.getBytes(), offset, myData.length());
             offset += myData.length();
-            */
-            myData = String.format("Problem Type : %.3f\n", (float) mScirDataProblemType);
-            out.write(myData.getBytes(), offset, myData.length());
-            offset += myData.length();
-
             out.flush();
             out.close();
+
+            if( mCameraData != null ) {
+                String fnameImage = "Image-"+ number +".jpg";
+                File fileImage = new File (myDir, fnameImage);
+                if (fileImage.exists ()) fileImage.delete ();
+                FileOutputStream outImage = new FileOutputStream(fileImage);
+                outImage.write(mCameraData, 0, mCameraData.length);
+                outImage.flush();
+                outImage.close();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,29 +113,9 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
 
     private void handleSubmissions() {
-
         if( mCameraData != null) {
 
         }
-        /*
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("End Game?");
-        alertDialog.setMessage("Are you sure you wish to end the game?");
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        alertDialog.show();
-        */
         SaveData();
     }
 
@@ -179,10 +140,20 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
             switch(checkedId) {
-                case 1:
-                case 2:
-                default :
-                    mScirDataProblemType = checkedId  ;
+                case R.id.scirCtrlRadioSelectElectricity:
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_ELECTRICITY;
+                    break ;
+                case R.id.scirCtrlRadioSelectWater:
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_WATER;
+                    break ;
+                case R.id.scirCtrlRadioSelectPollution:
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_POLLUTION;
+                    break ;
+                case R.id.scirCtrlRadioSelectRoad:
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_ROAD;
+                    break ;
+                default:
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_OTHER;
                     break ;
             }
         }
@@ -306,6 +277,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         if (mCamera != null) {
             try {
                 mCamera.setPreviewDisplay(holder);
+                mCamera.setDisplayOrientation(180); // Sasan : Hack for time being !!
                 if (mIsCapturing) {
                     mCamera.startPreview();
                 }
@@ -341,6 +313,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCamera.stopPreview();
         mCameraPreview.setVisibility(View.INVISIBLE);
         mCameraImage.setVisibility(View.VISIBLE);
+        mCameraImage.setRotation(180); // Sasan : hack ExifInterface.ORIENTATION_FLIP_VERTICAL
         mCaptureImageButton.setText(R.string.recapture_image); // ToDo : Fix string in strings.xml
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
