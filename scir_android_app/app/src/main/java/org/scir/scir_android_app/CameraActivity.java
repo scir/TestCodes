@@ -1,13 +1,12 @@
 package org.scir.scir_android_app;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.util.Random;
 
 import android.app.Activity;
@@ -23,12 +22,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
+import android.widget.RatingBar;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
 
     public static final String EXTRA_CAMERA_DATA = "camera_data";
-
     private static final String KEY_IS_CAPTURING = "is_capturing";
 
     private Camera mCamera;
@@ -38,7 +39,23 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private byte[] mCameraData;
     private boolean mIsCapturing;
 
-    private Button mReportScirFeedback;
+
+    private RadioGroup mScirCtlRadioGroupProblemType;
+    private RatingBar mScirCtlProblemSeverityRating ;
+    private SeekBar mScirCtlSeveritySeekBar ;
+    private Button mScirCtlButtonSubmitFeedback;
+
+    enum SCIR_PROBLEM_TYPE {
+        E_SCIR_WATER,
+        E_SCIR_ELECTRICITY,
+        E_SCIR_ROAD,
+        E_SCIR_SANITATION,
+        E_SCIR_POLLUTION,
+        E_SCIR_OTHER };
+
+    private float mScirDataLat, mScirDataLong, mScirDataDateTime ;
+    private float mScirDataProblemSeverityLevel;
+    private long mScirDataProblemType ;
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
@@ -86,18 +103,24 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         File file = new File (myDir, fname);
         if (file.exists ()) file.delete ();
         try {
-            offset = mCameraData.length;
             String myData = "Test Data";
             FileOutputStream out = new FileOutputStream(file);
+            /*
             if( mCameraData != null ) {
+                offset = mCameraData.length;
                 out.write(mCameraData, 0, mCameraData.length);
-                out.write(myData.getBytes(), offset, myData.length());
-                offset+= myData.length();
+                // out.write(myData.getBytes(), offset, myData.length());
+                // offset+= myData.length();
             }
-            myData = "Rest of fields";
+            */
+            /*
+            myData = String.format("Severity Level : %.3f\n", mScirDataProblemSeverityLevel);
             out.write(myData.getBytes(), offset, myData.length());
             offset += myData.length();
-
+            */
+            myData = String.format("Problem Type : %.3f\n", (float) mScirDataProblemType);
+            out.write(myData.getBytes(), offset, myData.length());
+            offset += myData.length();
 
             out.flush();
             out.close();
@@ -136,7 +159,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     }
 
 
-    private OnClickListener mDoneButtonClickListener = new OnClickListener() {
+    private OnClickListener mScirFeedbackButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
             handleSubmissions();
@@ -144,7 +167,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
                 /* TODO : This is final processing stage of all submitted contents */
-
                 setResult(RESULT_OK, intent);
             } else {
                 setResult(RESULT_CANCELED);
@@ -152,6 +174,57 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             finish();
         }
     };
+
+    private RadioGroup.OnCheckedChangeListener mScirProblemTypeGroupChangeListener = new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            switch(checkedId) {
+                case 1:
+                case 2:
+                default :
+                    mScirDataProblemType = checkedId  ;
+                    break ;
+            }
+        }
+    };
+
+    private SeekBar.OnSeekBarChangeListener mScirSeverityLevelSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    };
+
+    private RatingBar.OnRatingBarChangeListener mScirSeverityLevelRatingBarListener = new RatingBar.OnRatingBarChangeListener() {
+        @Override
+        public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+            /* Set rating level */
+            mScirDataProblemSeverityLevel = rating ;
+        }
+    };
+
+
+    private void setupScirEnvProblemCapturing() {
+        mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
+        mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
+        mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
+        mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
+
+        mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
+        mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
+        mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
+        mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +235,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
         mCameraImage.setVisibility(View.INVISIBLE);
 
+        setupScirEnvProblemCapturing();
+
         mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
         surfaceHolder.addCallback(this);
@@ -169,9 +244,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
         mCaptureImageButton = (Button) findViewById(R.id.capture_image_button);
         mCaptureImageButton.setOnClickListener(mCaptureImageButtonClickListener);
-
-        final Button doneButton = (Button) findViewById(R.id.done_button);
-        doneButton.setOnClickListener(mDoneButtonClickListener);
 
         mIsCapturing = true;
     }

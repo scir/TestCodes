@@ -51,33 +51,33 @@ android:orientation="vertical" >
 
 
         <RadioGroup
-                android:id="@+id/radioGroup1"
+                android:id="@+id/scirCtrlRadioGroupProblemType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="17dp" >
 
                 <RadioButton
-                    android:id="@+id/radio0"
+                    android:id="@+id/scirCtrlRadioSelectElectricity"
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:checked="true"
                     android:text="Electricity" />
 
                 <RadioButton
-                    android:id="@+id/radio1"
+                    android:id="@+id/scirCtrlRadioSelectWater"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:text="Water" />
 
                 <RadioButton
-                    android:id="@+id/radio2"
+                    android:id="@+id/scirCtrlRadioSelectRoad"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:text="Road" />
 
                 <RadioButton
-                    android:id="@+id/radio3"
+                    android:id="@+id/scirCtrlRadioSelectPollution"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:text="Pollution" />
@@ -85,17 +85,17 @@ android:orientation="vertical" >
     </LinearLayout>
 
     <RatingBar
-        android:id="@+id/ratingBar1"
+        android:id="@+id/scirCtrlRatingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
     <SeekBar
-        android:id="@+id/seekBar1"
+        android:id="@+id/scirCtrlSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/ratingBar1"
+        android:layout_below="@+id/scirCtrlRatingBar"
         android:layout_gravity="center" />
 
     <LinearLayout
@@ -107,7 +107,7 @@ android:orientation="vertical" >
         android:weightSum="1">
 
         <Button
-            android:id="@+id/done_button"
+            android:id="@+id/scirCtrlButtonFeedback"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:text="@string/done"
