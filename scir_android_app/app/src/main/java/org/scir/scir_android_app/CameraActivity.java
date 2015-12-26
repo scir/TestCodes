@@ -85,9 +85,9 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         File file = new File (myDir, fname);
         if (file.exists ()) file.delete ();
         try {
-            String myData = "Test Data";
+            String myData = "Saved Data :\n";
             FileOutputStream out = new FileOutputStream(file);
-            myData = String.format("Severity Level : %.3f\nProblem Type : %s\n",
+            myData = String.format("Saved Data :\nSeverity Level : %.3f\nProblem Type : %s\n",
                     mScirDataProblemSeverityLevel,
                     mScirDataProblemType.toString()
                     );
@@ -104,7 +104,10 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
                 outImage.write(mCameraData, 0, mCameraData.length);
                 outImage.flush();
                 outImage.close();
+                myData.concat("Image Saved : YES");
             }
+
+            Toast.makeText(CameraActivity.this, myData, Toast.LENGTH_LONG).show();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,23 +115,20 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     }
 
 
-    private void handleSubmissions() {
-        if( mCameraData != null) {
-
-        }
-        SaveData();
-    }
 
 
     private OnClickListener mScirFeedbackButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            handleSubmissions();
             if (mCameraData != null) {
+                // TODO : This is final processing stage of all submitted contents
+                SaveData();
+                /*
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
-                /* TODO : This is final processing stage of all submitted contents */
                 setResult(RESULT_OK, intent);
+                setResult(RESULT_OK);
+                */
             } else {
                 setResult(RESULT_CANCELED);
             }
