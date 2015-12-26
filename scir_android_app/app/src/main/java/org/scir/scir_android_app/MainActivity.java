@@ -1,5 +1,7 @@
 package org.scir.scir_android_app;
 
+import android.content.Context;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 
@@ -31,6 +33,8 @@ public class MainActivity extends Activity {
     ImageView imgLogo ;
     ImageView imgSmartCityPhoto ;
 
+    private LocationManager scirLocationManager ;
+    public static SCIRLocationFinder mScirLocationFinder ;
 
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
@@ -53,10 +57,33 @@ public class MainActivity extends Activity {
         }
     };
 
+    private void setupLocationServices() {
+        try {
+            // final LocationManager locationManager = (LocationManager) Context.getSystemService(Context.LOCATION_SERVICE);
+            scirLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            mScirLocationFinder = new SCIRLocationFinder();
+            scirLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mScirLocationFinder);
+            mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+            // mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+            if (mScirLocationFinder.isLocationQualityGood() ) {
+                // Can go ahead with capturing of photo quality...
+            } else {
+                // Need to tell user to wait for capturing problem
+            }
+        } catch(SecurityException se) {
+            Toast.makeText(MainActivity.this, "Unable to setup Security Exception.....", Toast.LENGTH_LONG).show();
+        } catch(Exception e) {
+            Toast.makeText(MainActivity.this, "Unable to setup Location Services possibly.....", Toast.LENGTH_LONG).show();
+        }
+}
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setupLocationServices();
 
         mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
 

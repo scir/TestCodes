@@ -1,5 +1,7 @@
 package org.scir.scir_android_app;
 
+import android.content.Context;
+import android.location.LocationManager;
 import android.media.ExifInterface;
 import android.os.Bundle;
 
@@ -27,6 +29,8 @@ import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+// import org.scir.scir_android_app.SCIRLocationFinder ;
 
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
 
@@ -59,6 +63,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private float mScirDataProblemSeverityLevel;
     private SCIR_PROBLEM_TYPE mScirDataProblemType ;
 
+
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -84,6 +89,21 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         String fname = "Image-"+ number + ".dat";
         File file = new File (myDir, fname);
         if (file.exists ()) file.delete ();
+
+        String strLocation = "" ;
+        try {
+            strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\nEpoch(%tc)\n",
+                    MainActivity.mScirLocationFinder.getmScirDataLatitude(), MainActivity.mScirLocationFinder.getmScirDataLongitude(),
+                    MainActivity.mScirLocationFinder.getmScirDataDatetime());
+            /*
+            strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\n",
+                    (float) MainActivity.mScirLocationFinder.getmScirDataLatitude(),
+                    (float) MainActivity.mScirLocationFinder.getmScirDataLongitude()
+            );
+            */
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             String myData = "Saved Data :\n";
             FileOutputStream out = new FileOutputStream(file);
@@ -91,6 +111,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
                     mScirDataProblemSeverityLevel,
                     mScirDataProblemType.toString()
                     );
+            myData = strLocation.concat(myData);
             out.write(myData.getBytes(), offset, myData.length());
             offset += myData.length();
             out.flush();
@@ -104,7 +125,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
                 outImage.write(mCameraData, 0, mCameraData.length);
                 outImage.flush();
                 outImage.close();
-                myData.concat("Image Saved : YES");
+                myData = myData.concat("Image Saved : YES");
             }
 
             Toast.makeText(CameraActivity.this, myData, Toast.LENGTH_LONG).show();
@@ -186,16 +207,27 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
 
     private void setupScirEnvProblemCapturing() {
-        mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
-        mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
-        mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
-        mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
+            mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
+            mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
+            mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
+            mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
 
-        mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
-        mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
-        mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
-        mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
+            // TODO: Remove any default settings selection to provide true picture to end user
+            mScirCtlRadioGroupProblemType.invalidate();
+
+            mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
+            mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
+            mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
+            mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
     }
+
+    /******************************************************************
+     * Main Activity
+     * @param savedInstanceState
+     * ****************************************************************
+     *
+     */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -318,3 +350,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
 }
+
+
+
