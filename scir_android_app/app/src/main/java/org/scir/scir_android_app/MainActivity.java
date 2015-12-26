@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
     private Button mSaveImageButton;
 
     ImageView imgLogo ;
+    ImageView imgSmartCityPhoto ;
 
 
 
@@ -64,8 +65,11 @@ public class MainActivity extends Activity {
         mSaveImageButton = (Button) findViewById(R.id.save_image_button);
         mSaveImageButton.setOnClickListener(mSaveImageButtonClickListener);
         mSaveImageButton.setEnabled(false);
+
         imgLogo = (ImageView) findViewById(R.id.imageView);
         imgLogo.setImageResource(R.drawable.scir_image);
+        imgSmartCityPhoto = (ImageView) findViewById(R.id.imageView2);
+        imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
 
     }
 
