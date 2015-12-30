@@ -93,8 +93,13 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         String strLocation = "" ;
         try {
             strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\nEpoch(%tc)\n",
+                    /*
                     MainActivity.mScirLocationFinder.getmScirDataLatitude(), MainActivity.mScirLocationFinder.getmScirDataLongitude(),
                     MainActivity.mScirLocationFinder.getmScirDataDatetime());
+                    */
+
+                    MainActivity.mScirCurrentLocation.getLatitude(), MainActivity.mScirCurrentLocation.getLongitude(),
+                    MainActivity.mScirCurrentLocation.getTime());
             /*
             strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\n",
                     (float) MainActivity.mScirLocationFinder.getmScirDataLatitude(),

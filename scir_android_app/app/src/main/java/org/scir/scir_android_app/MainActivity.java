@@ -1,6 +1,7 @@
 package org.scir.scir_android_app;
 
 import android.content.Context;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
@@ -16,6 +17,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -35,6 +37,9 @@ public class MainActivity extends Activity {
 
     private LocationManager scirLocationManager ;
     public static SCIRLocationFinder mScirLocationFinder ;
+
+    private SingleShotLocationProvider.LocationCallback mScirLocationCallBack;
+    public static Location mScirCurrentLocation ;
 
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
@@ -59,16 +64,30 @@ public class MainActivity extends Activity {
 
     private void setupLocationServices() {
         try {
-            // final LocationManager locationManager = (LocationManager) Context.getSystemService(Context.LOCATION_SERVICE);
-            scirLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            mScirLocationFinder = new SCIRLocationFinder();
-            scirLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mScirLocationFinder);
-            mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-            // mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-            if (mScirLocationFinder.isLocationQualityGood() ) {
-                // Can go ahead with capturing of photo quality...
+            int method = 2 ;
+            if( method == 2 ) {
+                mScirLocationCallBack =
+                    new SingleShotLocationProvider.LocationCallback() {
+                    @Override public void onNewLocationAvailable(Location location) {
+                        mScirCurrentLocation = location ;
+                        Log.d("Location", "my location is " + location.toString());
+                    }};
+                SingleShotLocationProvider.requestSingleUpdate(this.getBaseContext(), mScirLocationCallBack);
+
             } else {
-                // Need to tell user to wait for capturing problem
+                /*
+                // final LocationManager locationManager = (LocationManager) Context.getSystemService(Context.LOCATION_SERVICE);
+                scirLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                mScirLocationFinder = new SCIRLocationFinder();
+                scirLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mScirLocationFinder);
+                mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+                // mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+                if (mScirLocationFinder.isLocationQualityGood() ) {
+                    // Can go ahead with capturing of photo quality...
+                } else {
+                    // Need to tell user to wait for capturing problem
+                }
+                */
             }
         } catch(SecurityException se) {
             Toast.makeText(MainActivity.this, "Unable to setup Security Exception.....", Toast.LENGTH_LONG).show();

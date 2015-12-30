@@ -25,11 +25,9 @@ public class SCIRLocationFinder implements LocationListener {
     public double getmScirDataLongitude() {
         return mScirDataLongitude;
     }
-
     public long getmScirDataDatetime() {
         return mScirDataDatetime;
     }
-
     public double getmScirDataAccuracy() {
         return mScirDataAccuracy;
     }
