@@ -1,5 +1,6 @@
 package org.scir.scir_android_app;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
@@ -31,6 +32,9 @@ public class MainActivity extends Activity {
     private ImageView mCameraImageView;
     private Bitmap mCameraBitmap;
     private Button mSaveImageButton;
+
+    private Intent mIntentReportProblems = null ;
+    private Intent mIntentLocationCheck = null ;
 
     ImageView imgLogo ;
     ImageView imgSmartCityPhoto ;
@@ -71,9 +75,9 @@ public class MainActivity extends Activity {
                     @Override public void onNewLocationAvailable(Location location) {
                         mScirCurrentLocation = location ;
                         Log.d("Location", "my location is " + location.toString());
+                        Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_LONG).show();
                     }};
                 SingleShotLocationProvider.requestSingleUpdate(this.getBaseContext(), mScirLocationCallBack);
-
             } else {
                 /*
                 // final LocationManager locationManager = (LocationManager) Context.getSystemService(Context.LOCATION_SERVICE);
@@ -97,6 +101,22 @@ public class MainActivity extends Activity {
 }
 
 
+
+    private OnClickListener mLocationCheckButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mIntentLocationCheck == null ) {
+                mIntentLocationCheck = new Intent(MainActivity.this, CheckLocationActivity.class);
+            }
+            if( mIntentLocationCheck != null ) {
+                startActivityForResult(mIntentLocationCheck, TAKE_PICTURE_REQUEST_B);
+            } else {
+                // TODO : Show errro alert
+
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,8 +129,10 @@ public class MainActivity extends Activity {
         findViewById(R.id.capture_image_button).setOnClickListener(mCaptureImageButtonClickListener);
 
         mSaveImageButton = (Button) findViewById(R.id.save_image_button);
-        mSaveImageButton.setOnClickListener(mSaveImageButtonClickListener);
-        mSaveImageButton.setEnabled(false);
+//        mSaveImageButton.setOnClickListener(mSaveImageButtonClickListener);
+//        mSaveImageButton.setEnabled(false);
+        mSaveImageButton.setOnClickListener(mLocationCheckButtonClickListener);
+        mSaveImageButton.setEnabled(true);
 
         imgLogo = (ImageView) findViewById(R.id.imageView);
         imgLogo.setImageResource(R.drawable.scir_image);
@@ -118,6 +140,7 @@ public class MainActivity extends Activity {
         imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
 
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

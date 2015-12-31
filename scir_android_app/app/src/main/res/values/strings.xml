@@ -1,13 +1,18 @@
 <resources>
-    <string name="app_name">SCIR Reporting App</string>
+    <string name="app_name">Reporting Infra Problems\n(Smart City Way)</string>
 
     <string name="action_settings">Settings</string>
-    <string name="start_image_capture">Report Problem</string>
+    <string name="str_btn_action_reports">Report Problem</string>
     <string name="capture_image">Take Snap of Infra Issue</string>
-    <string name="save_image">See Reported Problems</string>
+    <string name="str_btn_report_problem">See Reported Problems</string>
     <string name="recapture_image">Retake Picture</string>
     <string name="capturing_image">Taking New Picture</string>
     <string name="done">Report SCIR Feedback</string>
     <string name="title_activity_check_location">CheckLocationActivity</string>
+
+
+    <string name="pause">Pause Location Updates</string>
+    <string name="resume">Resume Location Updates</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>
