@@ -54,7 +54,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         E_SCIR_OTHER
     };
 
-    private float mScirDataLat, mScirDataLong, mScirDataDateTime ;
+    private double mScirDataLat, mScirDataLong;
+    private long mScirDataDateTime ;
     private float mScirDataProblemSeverityLevel;
     private SCIR_PROBLEM_TYPE mScirDataProblemType ;
 
@@ -88,19 +89,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         String strLocation = "" ;
         try {
             strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\nEpoch(%tc)\n",
-                    /*
-                    MainActivity.mScirLocationFinder.getmScirDataLatitude(), MainActivity.mScirLocationFinder.getmScirDataLongitude(),
-                    MainActivity.mScirLocationFinder.getmScirDataDatetime());
-                    */
-
-                    MainActivity.mScirCurrentLocation.getLatitude(), MainActivity.mScirCurrentLocation.getLongitude(),
-                    MainActivity.mScirCurrentLocation.getTime());
-            /*
-            strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\n",
-                    (float) MainActivity.mScirLocationFinder.getmScirDataLatitude(),
-                    (float) MainActivity.mScirLocationFinder.getmScirDataLongitude()
-            );
-            */
+                    mScirDataLat, mScirDataLong, mScirDataDateTime);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -135,6 +124,13 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     }
 
+    private boolean reportInfraProblemToBackEnd(double Latitude, double Longitude, long epocDateTime, String strDescription, byte []image,
+                                        SCIR_PROBLEM_TYPE problemType, float severityLevel) {
+
+
+        /* TODO : Call the appropriate interface of Backend Web Service here !!*/
+        return true ;
+    }
 
 
 
@@ -143,7 +139,13 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         public void onClick(View v) {
             if (mCameraData != null) {
                 // TODO : This is final processing stage of all submitted contents
-                SaveData();
+                mScirDataLat = MainActivity.mScirCurrentLocation.getLatitude() ;
+                mScirDataLong = MainActivity.mScirCurrentLocation.getLongitude();
+                mScirDataDateTime = MainActivity.mScirCurrentLocation.getTime();
+
+                SaveData(); // TODO: To be cleaned up and removed !! after below is in order
+                reportInfraProblemToBackEnd(mScirDataLat, mScirDataLong, mScirDataDateTime,
+                        "Description", mCameraData, mScirDataProblemType, mScirDataProblemSeverityLevel);
                 /*
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
@@ -210,15 +212,15 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
             mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
             mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
-            mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
+            // mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
 
             // TODO: Remove any default settings selection to provide true picture to end user
             mScirCtlRadioGroupProblemType.invalidate();
 
-            mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
-            mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
+        mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
+        mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
             mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
-            mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
+            // mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
     }
 
     /******************************************************************
