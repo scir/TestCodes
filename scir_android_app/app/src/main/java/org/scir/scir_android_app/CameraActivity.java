@@ -233,6 +233,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         setContentView(R.layout.activity_camera);
 
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
@@ -309,7 +310,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         if (mCamera != null) {
             try {
                 mCamera.setPreviewDisplay(holder);
-                mCamera.setDisplayOrientation(180); // Sasan : Hack for time being !!
+                // mCamera.setDisplayOrientation(180); // Sasan : Hack for time being !! => Works for simulator....
+                mCamera.setDisplayOrientation(90); // Hack : Works For Samsung S3 Neo
                 if (mIsCapturing) {
                     mCamera.startPreview();
                 }
@@ -318,6 +320,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             }
         }
     }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -345,10 +348,12 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCamera.stopPreview();
         mCameraPreview.setVisibility(View.INVISIBLE);
         mCameraImage.setVisibility(View.VISIBLE);
-        mCameraImage.setRotation(180); // Sasan : hack ExifInterface.ORIENTATION_FLIP_VERTICAL
+  //      mCameraImage.setRotation(180); // Sasan : hack ExifInterface.ORIENTATION_FLIP_VERTICAL -> For Simulator
+        mCameraImage.setRotation(90);
         mCaptureImageButton.setText(R.string.recapture_image); // ToDo : Fix string in strings.xml
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
+
 }
 
 
