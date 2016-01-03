@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Reporting Infra Problems\n(Smart City Way)</string>
+    <string name="app_name">Report City Infra Problems</string>
 
     <string name="action_settings">Settings</string>
     <string name="str_btn_report_infra_problems">Report Problem</string>
@@ -10,10 +10,13 @@
     <string name="done">Report SCIR Feedback</string>
     <string name="title_activity_check_location">CheckLocationActivity</string>
 
+    <string name="strTextViewGeoLocationStatus">Wait... Fetching Location</string>
+    <string name="strTextViewGeoLocationStatusDone">Geo Location Updated! Proceed with Capture...</string>
 
     <string name="pause">Pause Location Updates</string>
     <string name="resume">Resume Location Updates</string>
     <string name="hello_world">Hello world!</string>
+
     <string name="str_btn_view_location_services">Check Location Services</string>
 
 </resources>

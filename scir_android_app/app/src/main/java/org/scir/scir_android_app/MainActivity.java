@@ -1,5 +1,6 @@
 package org.scir.scir_android_app;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -24,6 +26,8 @@ public class MainActivity extends Activity {
     private Bitmap mCameraBitmap;
     private Button mViewReportedProblemsButton;
     private Button mLocationServicesButton ;
+
+    private TextView mTextViewGeoLocationStatus;
 
     private Intent mIntentReportProblems = null ;
     private Intent mIntentLocationCheck = null ;
@@ -54,6 +58,10 @@ public class MainActivity extends Activity {
                         mScirCurrentLocation = location ;
                         Log.d("Location", "my location is " + location.toString());
                         Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_LONG).show();
+                        if( mTextViewGeoLocationStatus != null ) {
+                            mTextViewGeoLocationStatus.setTextColor(Color.rgb(0, 255, 0));
+                            mTextViewGeoLocationStatus.setText("GOT GeoLocation! Please proceed...");
+                        }
                     }};
                 SingleShotLocationProvider.requestSingleUpdate(this.getBaseContext(), mScirLocationCallBack);
             } else {
@@ -76,7 +84,7 @@ public class MainActivity extends Activity {
         } catch(Exception e) {
             Toast.makeText(MainActivity.this, "Unable to setup Location Services possibly.....", Toast.LENGTH_LONG).show();
         }
-}
+    }
 
 
 
@@ -99,6 +107,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Prepare Status text view */
+        mTextViewGeoLocationStatus = (TextView) findViewById(R.id.textViewGeoLocationStatus);
+        mTextViewGeoLocationStatus.setTextColor(Color.rgb(255,0,0));
 
         setupLocationServices();
 
