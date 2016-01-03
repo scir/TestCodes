@@ -1,23 +1,14 @@
 package org.scir.scir_android_app;
 
-import android.app.AlertDialog;
-import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,7 +22,8 @@ public class MainActivity extends Activity {
 
     private ImageView mCameraImageView;
     private Bitmap mCameraBitmap;
-    private Button mSaveImageButton;
+    private Button mViewReportedProblemsButton;
+    private Button mLocationServicesButton ;
 
     private Intent mIntentReportProblems = null ;
     private Intent mIntentLocationCheck = null ;
@@ -41,28 +33,14 @@ public class MainActivity extends Activity {
 
     private LocationManager scirLocationManager ;
     public static SCIRLocationFinder mScirLocationFinder ;
-
     private SingleShotLocationProvider.LocationCallback mScirLocationCallBack;
     public static Location mScirCurrentLocation ;
 
 
-    private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
+    private OnClickListener mCaptureInfraProblemButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            startImageCapture();
-        }
-    };
-
-    private OnClickListener mSaveImageButtonClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            File saveFile = openFileForImage();
-            if (saveFile != null) {
-                saveImageToFile(saveFile);
-            } else {
-                Toast.makeText(MainActivity.this, "Unable to open file for saving image.",
-                        Toast.LENGTH_LONG).show();
-            }
+            startInfraProblemCapture();
         }
     };
 
@@ -124,16 +102,20 @@ public class MainActivity extends Activity {
 
         setupLocationServices();
 
+        /* Need to check view contents of final image view from camera activity */
         mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
 
-        findViewById(R.id.capture_image_button).setOnClickListener(mCaptureImageButtonClickListener);
+        /* Set buttons Views */
+        findViewById(R.id.capture_infra_problem_button).setOnClickListener(mCaptureInfraProblemButtonClickListener);
 
-        mSaveImageButton = (Button) findViewById(R.id.save_image_button);
-//        mSaveImageButton.setOnClickListener(mSaveImageButtonClickListener);
-//        mSaveImageButton.setEnabled(false);
-        mSaveImageButton.setOnClickListener(mLocationCheckButtonClickListener);
-        mSaveImageButton.setEnabled(true);
+//        mLocationServicesButton = (Button) findViewById(R.id.check_problems_reported_button);
+        mLocationServicesButton = (Button) findViewById(R.id.check_location_services_button);
+        mLocationServicesButton.setOnClickListener(mLocationCheckButtonClickListener);
+        mLocationServicesButton.setEnabled(true);
 
+        mViewReportedProblemsButton = (Button) findViewById(R.id.check_problems_reported_button);
+
+        /* Show Startup Images for Main Activity */
         imgLogo = (ImageView) findViewById(R.id.imageView);
         imgLogo.setImageResource(R.drawable.scir_image);
         imgSmartCityPhoto = (ImageView) findViewById(R.id.imageView2);
@@ -157,57 +139,17 @@ public class MainActivity extends Activity {
                 if (cameraData != null) {
                     mCameraBitmap = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);
                     mCameraImageView.setImageBitmap(mCameraBitmap);
-                    mSaveImageButton.setEnabled(true);
+                    mViewReportedProblemsButton.setEnabled(true);
                 }
             } else {
                 mCameraBitmap = null;
-                mSaveImageButton.setEnabled(false);
+                mViewReportedProblemsButton.setEnabled(false);
             }
         }
     }
 
-    private void startImageCapture() {
+    private void startInfraProblemCapture() {
         startActivityForResult(new Intent(MainActivity.this, CameraActivity.class), TAKE_PICTURE_REQUEST_B);
     }
 
-    private File openFileForImage() {
-        File imageDirectory = null;
-        String storageState = Environment.getExternalStorageState();
-        if (storageState.equals(Environment.MEDIA_MOUNTED)) {
-            imageDirectory = new File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                    "com.oreillyschool.android2.camera");
-            if (!imageDirectory.exists() && !imageDirectory.mkdirs()) {
-                imageDirectory = null;
-            } else {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_mm_dd_hh_mm",
-                        Locale.getDefault());
-
-                return new File(imageDirectory.getPath() +
-                        File.separator + "image_" +
-                        dateFormat.format(new Date()) + ".png");
-            }
-        }
-        return null;
-    }
-
-    private void saveImageToFile(File file) {
-        if (mCameraBitmap != null) {
-            FileOutputStream outStream = null;
-            try {
-                outStream = new FileOutputStream(file);
-                if (!mCameraBitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)) {
-                    Toast.makeText(MainActivity.this, "Unable to save image to file.",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Saved image to: " + file.getPath(),
-                            Toast.LENGTH_LONG).show();
-                }
-                outStream.close();
-            } catch (Exception e) {
-                Toast.makeText(MainActivity.this, "Unable to save image to file.",
-                        Toast.LENGTH_LONG).show();
-            }
-        }
-    }
 }

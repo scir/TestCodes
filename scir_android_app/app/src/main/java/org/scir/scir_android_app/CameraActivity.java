@@ -1,19 +1,14 @@
 package org.scir.scir_android_app;
 
-import android.content.Context;
-import android.location.LocationManager;
-import android.media.ExifInterface;
 import android.os.Bundle;
 
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
 import java.util.Random;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -250,7 +245,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        mCaptureImageButton = (Button) findViewById(R.id.capture_image_button);
+        mCaptureImageButton = (Button) findViewById(R.id.capture_infra_problem_button);
         mCaptureImageButton.setOnClickListener(mCaptureImageButtonClickListener);
 
         mIsCapturing = true;

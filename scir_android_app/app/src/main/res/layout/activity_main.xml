@@ -53,22 +53,33 @@ tools:context="org.scir.scir_android_app.MainActivity">
     android:gravity="center" >
 
     <Button
-        android:id="@+id/capture_image_button"
+        android:id="@+id/capture_infra_problem_button"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="@string/str_btn_action_reports"
+        android:text="@string/str_btn_report_infra_problems"
         android:background="#4e62ab"
         android:textColor="#c02020"
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/save_image_button"
+        android:id="@+id/check_problems_reported_button"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="@string/str_btn_report_problem"
+        android:text="@string/str_btn_view_problems_reported"
         android:background="#875252"
         android:textColor="#000000"
         android:textStyle="bold" />
-</LinearLayout>
+
+        <Button
+            android:id="@+id/check_location_services_button"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="@string/str_btn_view_location_services"
+            android:background="#875252"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+
+
+    </LinearLayout>
 
 </LinearLayout>
