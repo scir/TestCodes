@@ -18,6 +18,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Functionalities to be added / enhanced :
+ * 1) Location should be predicted accurately in a speedy manner using Location Services (out of speed and accuracy, ACCURACY has higher priority.
+ */
+
 public class MainActivity extends Activity {
 
     private static final int TAKE_PICTURE_REQUEST_B = 100;
@@ -57,7 +62,7 @@ public class MainActivity extends Activity {
                     @Override public void onNewLocationAvailable(Location location) {
                         mScirCurrentLocation = location ;
                         Log.d("Location", "my location is " + location.toString());
-                        Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_SHORT).show();
                         if( mTextViewGeoLocationStatus != null ) {
                             mTextViewGeoLocationStatus.setTextColor(Color.rgb(0, 255, 0));
                             mTextViewGeoLocationStatus.setText("GOT GeoLocation! Please proceed...");

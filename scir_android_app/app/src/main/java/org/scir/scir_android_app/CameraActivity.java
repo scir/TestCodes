@@ -1,12 +1,32 @@
 package org.scir.scir_android_app;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -14,6 +34,9 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Environment;
+import android.provider.SyncStateContract;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -25,7 +48,34 @@ import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.entity.EntityBuilder;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.client.HttpClient ;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+import org.w3c.dom.EntityReference;
+
+
 // import org.scir.scir_android_app.SCIRLocationFinder ;
+
+/**
+ * Functionalities to be added / enhanced (TODO):
+ * 1) In case of high resolution mobile cameras, photos with some minimum size should be captured, otherwise it will overload system
+ * 2) Image Orientation needs to be handled in a device independent manner (Currently it might be running only SAMSUNG based devices in correct manner)
+ * 3) Image contents need to be compressed in JPG format at source only (in case not being already handled)
+ * 4) INTEGRATION with server Front End needs to be done ASAP.
+ * 5) Deprecated APIs need to be planned for porting to newer versions
+ */
 
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
 
@@ -41,24 +91,34 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
 
     private RadioGroup mScirCtlRadioGroupProblemType;
-    private RatingBar mScirCtlProblemSeverityRating ;
-    private SeekBar mScirCtlSeveritySeekBar ;
+    private RatingBar mScirCtlProblemSeverityRating;
+    private SeekBar mScirCtlSeveritySeekBar;
     private Button mScirCtlButtonSubmitFeedback;
+
+    ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint;
+
+    final String uploadFilePath = "/mnt/sdcard/saved_data";
+    final String uploadFileName = "service_lifecycle.png";
 
     public enum SCIR_PROBLEM_TYPE {
         E_SCIR_WATER,
-        E_SCIR_ELECTRICITY ,
+        E_SCIR_ELECTRICITY,
         E_SCIR_ROAD,
-        E_SCIR_SANITATION ,
-        E_SCIR_POLLUTION ,
+        E_SCIR_SANITATION,
+        E_SCIR_POLLUTION,
         E_SCIR_OTHER
-    };
+    }
+
+    ;
 
     private double mScirDataLat, mScirDataLong;
-    private long mScirDataDateTime ;
+    private long mScirDataDateTime;
+    private String mScirDataMobileNumber;
+    private String mScirDataDeviceId;
     private float mScirDataProblemSeverityLevel;
-    private SCIR_PROBLEM_TYPE mScirDataProblemType ;
+    private SCIR_PROBLEM_TYPE mScirDataProblemType;
 
+    private int mServerResponseCode = 0;
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
@@ -82,11 +142,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
         int n = 10000, offset = 0;
         int number = generator.nextInt(n);
-        String fname = "Image-"+ number + ".dat";
-        File file = new File (myDir, fname);
-        if (file.exists ()) file.delete ();
+        String fname = "Image-" + number + ".dat";
+        File file = new File(myDir, fname);
+        if (file.exists()) file.delete();
 
-        String strLocation = "" ;
+        String strLocation = "";
         try {
             strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\nEpoch(%tc)\n",
                     mScirDataLat, mScirDataLong, mScirDataDateTime);
@@ -99,17 +159,17 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             myData = String.format("Saved Data :\nSeverity Level : %.3f\nProblem Type : %s\n",
                     mScirDataProblemSeverityLevel,
                     mScirDataProblemType.toString()
-                    );
+            );
             myData = strLocation.concat(myData);
             out.write(myData.getBytes(), offset, myData.length());
             offset += myData.length();
             out.flush();
             out.close();
 
-            if( mCameraData != null ) {
-                String fnameImage = "Image-"+ number +".jpg";
-                File fileImage = new File (myDir, fnameImage);
-                if (fileImage.exists ()) fileImage.delete ();
+            if (mCameraData != null) {
+                String fnameImage = "Image-" + number + ".jpg";
+                File fileImage = new File(myDir, fnameImage);
+                if (fileImage.exists()) fileImage.delete();
                 FileOutputStream outImage = new FileOutputStream(fileImage);
                 outImage.write(mCameraData, 0, mCameraData.length);
                 outImage.flush();
@@ -124,34 +184,113 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     }
 
-    private boolean reportInfraProblemToBackEnd(double Latitude, double Longitude, long epocDateTime, String strDescription, byte []image,
-                                        SCIR_PROBLEM_TYPE problemType, float severityLevel) {
+    private OutputStream os ;
+    String lineEnd = "\r\n";
+    String twoHyphens = "--";
+    String boundary  = "*****";
+    String delimiter = "*****";
 
 
-        /* TODO : Call the appropriate interface of Backend Web Service here !!*/
-        return true ;
+
+
+    private boolean reportInfraProblemToBackEnd(ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint) {
+        // Call the appropriate interface of Backend Web Service here
+        System.out.println("onClick!!!");
+
+        DataOutputStream dos = null ;
+
+        String charset = "UTF-8";
+        File uploadFile1 = new File("e:/Test/PIC1.JPG");
+        File uploadFile2 = new File("e:/Test/PIC2.JPG");
+        String requestURL = "http://192.168.1.104:8080/smart-city/AddTicket";
+        String fileName = uploadFilePath + uploadFileName ;
+
+
+        try {
+            MultipartUtility multipart = new MultipartUtility(requestURL, charset);
+
+            multipart.addHeaderField("User-Agent", "SCIR");
+            multipart.addHeaderField("Test-Header", "Header-Value");
+//            multipart.addHeaderField("Connection", "Keep-Alive");
+//            multipart.addHeaderField("ENCTYPE", "multipart/form-data");
+            Log.i("CLientApp", "Level C1.0");
+
+            multipart.addFormField("description", "Cool Pictures");
+            multipart.addFormField("keywords", "Java,upload,Spring");
+            multipart.addFormField("summary", "Sample String");
+            multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
+            multipart.addFormField("severity", "Urgent");
+            multipart.addFormField("imgFile", "samplefilename.txt");
+            multipart.addFormField("deviceId", mScirDataInfraFeedbackPoint.getScirDataDeviceId());
+            multipart.addFormField("msisdn", mScirDataInfraFeedbackPoint.getScirDataMobileNumber());
+            multipart.addFormField("latitude", "12.34");
+            multipart.addFormField("longitude", "3.8");
+            multipart.addFormField("time", "123434");
+
+            Log.i("CLientApp", "Level C1.1");
+//            multipart.addFilePart("fileUpload", fileName);
+//            multipart.addFilePart("fileUpload", uploadFile2);
+
+            List<String> response = multipart.finish();
+
+            System.out.println("SERVER REPLIED:");
+            Log.i("ClientApp", "SERVER REPLY");
+
+            //display what returns the POST request
+            for (String line : response) {
+                System.out.println(line);
+                Log.i("ClientApp", line);
+            }
+        } catch (MalformedURLException eURL) {
+            eURL.printStackTrace();
+        } catch (IOException ex) {
+            System.err.println(ex);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        return true;
     }
 
+    public void addFormPart(String paramName, String value) throws Exception {
+        writeParamData(paramName, value);
+    }
 
+    private void writeParamData(String paramName, String value) throws Exception {
+        os.write( (delimiter + boundary + "\r\n").getBytes());
+        os.write( "Content-Type: text/plain\r\n".getBytes());
+        os.write( ("Content-Disposition: form-data; name=\"" + paramName + "\"\r\n").getBytes());;
+        os.write( ("\r\n" + value + "\r\n").getBytes());
 
+    }
     private OnClickListener mScirFeedbackButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
             if (mCameraData != null) {
                 // TODO : This is final processing stage of all submitted contents
-                mScirDataLat = MainActivity.mScirCurrentLocation.getLatitude() ;
-                mScirDataLong = MainActivity.mScirCurrentLocation.getLongitude();
-                mScirDataDateTime = MainActivity.mScirCurrentLocation.getTime();
+                TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+                mScirDataMobileNumber = tm.getLine1Number();
+                mScirDataDeviceId = tm.getDeviceId();
+                if (mScirDataMobileNumber == null) mScirDataMobileNumber = "UNAVAILABLE";
+                if (mScirDataDeviceId == null) mScirDataDeviceId = "NOT_AVAILABLE";
+
+
+                mScirDataInfraFeedbackPoint = new ScirInfraFeedbackPoint(
+                        MainActivity.mScirCurrentLocation.getLatitude(),
+                        MainActivity.mScirCurrentLocation.getLongitude(),
+                        MainActivity.mScirCurrentLocation.getTime(),
+                        mCameraData,
+                        mScirDataProblemType, mScirDataProblemSeverityLevel,
+                        mScirDataMobileNumber, mScirDataDeviceId,
+                        "<<Description>>");
+
 
                 SaveData(); // TODO: To be cleaned up and removed !! after below is in order
-                reportInfraProblemToBackEnd(mScirDataLat, mScirDataLong, mScirDataDateTime,
-                        "Description", mCameraData, mScirDataProblemType, mScirDataProblemSeverityLevel);
-                /*
-                Intent intent = new Intent();
-                intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
-                setResult(RESULT_OK, intent);
-                setResult(RESULT_OK);
-                */
+                new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
+//                reportInfraProblemToBackEnd(mScirDataInfraFeedbackPoint);
             } else {
                 setResult(RESULT_CANCELED);
             }
@@ -162,22 +301,22 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private RadioGroup.OnCheckedChangeListener mScirProblemTypeGroupChangeListener = new RadioGroup.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
-            switch(checkedId) {
+            switch (checkedId) {
                 case R.id.scirCtrlRadioSelectElectricity:
                     mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_ELECTRICITY;
-                    break ;
+                    break;
                 case R.id.scirCtrlRadioSelectWater:
                     mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_WATER;
-                    break ;
+                    break;
                 case R.id.scirCtrlRadioSelectPollution:
                     mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_POLLUTION;
-                    break ;
+                    break;
                 case R.id.scirCtrlRadioSelectRoad:
                     mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_ROAD;
-                    break ;
+                    break;
                 default:
                     mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_OTHER;
-                    break ;
+                    break;
             }
         }
     };
@@ -203,31 +342,31 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         @Override
         public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
             /* Set rating level */
-            mScirDataProblemSeverityLevel = rating ;
+            mScirDataProblemSeverityLevel = rating;
         }
     };
 
 
     private void setupScirEnvProblemCapturing() {
-            mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
-            mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
-            mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
-            // mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
+        mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
+        mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
+        mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
+        // mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
 
-            // TODO: Remove any default settings selection to provide true picture to end user
-            mScirCtlRadioGroupProblemType.invalidate();
+        // TODO: Remove any default settings selection to provide true picture to end user
+        mScirCtlRadioGroupProblemType.invalidate();
 
         mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
         mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
-            mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
-            // mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
+        mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
+        // mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
     }
 
     /******************************************************************
      * Main Activity
-     * @param savedInstanceState
-     * ****************************************************************
      *
+     * @param savedInstanceState
+     *****************************************************************
      */
 
 
@@ -350,13 +489,34 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCamera.stopPreview();
         mCameraPreview.setVisibility(View.INVISIBLE);
         mCameraImage.setVisibility(View.VISIBLE);
-  //      mCameraImage.setRotation(180); // Sasan : hack ExifInterface.ORIENTATION_FLIP_VERTICAL -> For Simulator
+        //      mCameraImage.setRotation(180); // Sasan : hack ExifInterface.ORIENTATION_FLIP_VERTICAL -> For Simulator
         mCameraImage.setRotation(90);
         mCaptureImageButton.setText(R.string.recapture_image); // ToDo : Fix string in strings.xml
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
 
+
+    class SubmitDataToBackEndTask extends AsyncTask<ScirInfraFeedbackPoint, Void, Void> {
+//            String, Void, RSSFeed>
+
+        private Exception exception;
+        ScirInfraFeedbackPoint mFeedbackPoint ;
+
+        protected Void doInBackground(ScirInfraFeedbackPoint... feedbackPoint) {
+            try {
+                this.mFeedbackPoint = feedbackPoint[0] ;
+                reportInfraProblemToBackEnd(mScirDataInfraFeedbackPoint);
+            } catch (Exception e) {
+                this.exception = e;
+            }
+            return null;
+        }
+
+        protected void onPostExecute(ScirInfraFeedbackPoint feedbackPoint) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+        }
+    }
+
+
 }
-
-
-
