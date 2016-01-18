@@ -6,6 +6,8 @@ package org.scir.scir_android_app;
  */
 
 
+        import android.util.Log;
+
         import java.io.BufferedReader;
 
         import java.io.File;
@@ -113,6 +115,48 @@ public class MultipartUtility {
         writer.append(LINE_FEED);
         writer.flush();
     }
+
+    /**
+     * Adds a upload file section to the request
+     * @param fieldName name attribute in <input type="file" name="..." />
+     * @param fileName name of File being uploaded
+     * @param content contents to be written
+     * @throws IOException
+     */
+    public void addFilePart(String fieldName, String fileName, byte content[], int bytesSize)
+            throws IOException {
+        writer.append("--" + boundary).append(LINE_FEED);
+        writer.append(
+                "Content-Disposition: form-data; name=\"" + fieldName
+                        + "\"; filename=\"" + fileName + "\"")
+                .append(LINE_FEED);
+        writer.append(
+                "Content-Type: "
+                        + URLConnection.guessContentTypeFromName(fileName))
+                .append(LINE_FEED);
+        writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
+        writer.append(LINE_FEED);
+        writer.flush();
+
+        final int BUFFER_SIZE = 4096 ;
+//        int bytesSize = content.length ;
+        Log.i("AppSCIR", "Total size" + Integer.valueOf(bytesSize));
+        for(int i = 0 ; i <= bytesSize ; i+=BUFFER_SIZE) {
+            if( (bytesSize - i ) < BUFFER_SIZE) {
+                outputStream.write(content, i,(bytesSize-i));
+                Log.i("AppSCIR", "iteration last also being done:" + Integer.valueOf(i));
+            } else {
+                outputStream.write(content, i, (BUFFER_SIZE));
+                Log.i("AppSCIR", "iteration till :" + Integer.valueOf(i));
+            }
+        }
+        outputStream.flush();
+
+        writer.append(LINE_FEED);
+        writer.flush();
+    }
+
+
 
     /**
      * Adds a header field to the request.

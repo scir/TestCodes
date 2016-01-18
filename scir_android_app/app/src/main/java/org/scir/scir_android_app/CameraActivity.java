@@ -1,32 +1,19 @@
 package org.scir.scir_android_app;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -34,7 +21,6 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Environment;
-import android.provider.SyncStateContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -48,22 +34,7 @@ import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.entity.EntityBuilder;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.client.HttpClient ;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
-import org.w3c.dom.EntityReference;
 
 
 // import org.scir.scir_android_app.SCIRLocationFinder ;
@@ -78,6 +49,8 @@ import org.w3c.dom.EntityReference;
  */
 
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
+
+    public static enum TICKET_SEVERITY {INVALID, Low, Normal, High, Urgent};
 
     public static final String EXTRA_CAMERA_DATA = "camera_data";
     private static final String KEY_IS_CAPTURING = "is_capturing";
@@ -218,9 +191,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             multipart.addFormField("description", "Cool Pictures");
             multipart.addFormField("keywords", "Java,upload,Spring");
             multipart.addFormField("summary", "Sample String");
-            multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
-            multipart.addFormField("severity", "Urgent");
-            multipart.addFormField("imgFile", "samplefilename.txt");
+//            multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
+            multipart.addFormField("severity", TICKET_SEVERITY.Urgent.toString());
+            multipart.addFormField("type", "Road");
+//            multipart.addFormField("severity", "Low");
+//            multipart.addFormField("imgFile", fileName);
             multipart.addFormField("deviceId", mScirDataInfraFeedbackPoint.getScirDataDeviceId());
             multipart.addFormField("msisdn", mScirDataInfraFeedbackPoint.getScirDataMobileNumber());
             multipart.addFormField("latitude", "12.34");
@@ -228,6 +203,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             multipart.addFormField("time", "123434");
 
             Log.i("CLientApp", "Level C1.1");
+            multipart.addFilePart("imgFile", fileName, mCameraData, mCameraData.length);
 //            multipart.addFilePart("fileUpload", fileName);
 //            multipart.addFilePart("fileUpload", uploadFile2);
 
@@ -248,9 +224,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
 
         return true;
     }
@@ -517,6 +490,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             // TODO: do something with the feed
         }
     }
+
+
 
 
 }
