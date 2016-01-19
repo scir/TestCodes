@@ -1,26 +1,22 @@
 package org.scir.scir_android_app;
 
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Random;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
-import android.os.Environment;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -79,20 +75,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
     ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint;
 
-    final String uploadFilePath = "/mnt/sdcard/saved_data";
-    final String uploadFileName = "service_lifecycle.png";
-
-//    public enum SCIR_PROBLEM_TYPE {
-//        E_SCIR_WATER,
-//        E_SCIR_ELECTRICITY,
-//        E_SCIR_ROAD,
-//        E_SCIR_SANITATION,
-//        E_SCIR_POLLUTION,
-//        E_SCIR_OTHER
-//    }
-
-    private double mScirDataLat, mScirDataLong;
-    private long mScirDataDateTime;
     private String mScirDataMobileNumber;
     private String mScirDataDeviceId;
     private float mScirDataProblemSeverityLevel;
@@ -114,88 +96,27 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     };
 
-    private void SaveData() {
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/saved_data");
-        myDir.mkdirs();
-        Random generator = new Random();
-
-        int n = 10000, offset = 0;
-        int number = generator.nextInt(n);
-        String fname = "Image-" + number + ".dat";
-        File file = new File(myDir, fname);
-        if (file.exists()) file.delete();
-
-        String strLocation = "";
-        try {
-            strLocation = String.format("Latitude(%.3f)\nLongitude(%.3f)\nEpoch(%tc)\n",
-                    mScirDataLat, mScirDataLong, mScirDataDateTime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            String myData = "Saved Data :\n";
-            FileOutputStream out = new FileOutputStream(file);
-            myData = String.format("Saved Data :\nSeverity Level : %.3f\nProblem Type : %s\n",
-                    mScirDataProblemSeverityLevel,
-                    mScirDataProblemType.toString()
-            );
-            myData = strLocation.concat(myData);
-            out.write(myData.getBytes(), offset, myData.length());
-            offset += myData.length();
-            out.flush();
-            out.close();
-
-            if (mCameraData != null) {
-                String fnameImage = "Image-" + number + ".jpg";
-                File fileImage = new File(myDir, fnameImage);
-                if (fileImage.exists()) fileImage.delete();
-                FileOutputStream outImage = new FileOutputStream(fileImage);
-                outImage.write(mCameraData, 0, mCameraData.length);
-                outImage.flush();
-                outImage.close();
-                myData = myData.concat("Image Saved : YES");
-            }
-
-            Toast.makeText(CameraActivity.this, myData, Toast.LENGTH_LONG).show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private OutputStream os ;
-    String lineEnd = "\r\n";
-    String twoHyphens = "--";
-    String boundary  = "*****";
-    String delimiter = "*****";
-
-
-
-
     private boolean reportInfraProblemToBackEnd(ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint) {
-        // Call the appropriate interface of Backend Web Service here
-        System.out.println("onClick!!!");
-
         DataOutputStream dos = null ;
 
         String charset = "UTF-8";
         String requestURL = "http://192.168.1.100:8080/smart-city/AddTicket";
 //        String requestURL = "http://192.168.1.125:9999/SmartCity/AddTicket";
-        String fileName = uploadFilePath + uploadFileName ;
-
+//        final String uploadFilePath = "/mnt/sdcard/saved_data";
+//        final String uploadFileName = "service_lifecycle.png";
+//        String fileName = uploadFilePath + uploadFileName ;
+        String fileName = "Image" +
+//                "_" + mScirDataMobileNumber.substring(1) + "_" + Long.toString(mScirDataInfraFeedbackPoint.getScirDataDateTime()) +
+                ".jpg" ;
 
         try {
             MultipartUtility multipart = new MultipartUtility(requestURL, charset);
-
             multipart.addHeaderField("User-Agent", "SCIR");
             multipart.addHeaderField("Test-Header", "Header-Value");
             Log.i("CLientApp", "Level C1.0 2016-01-19 11:02");
 
-            multipart.addFormField("description", "Cool Pictures");
-            multipart.addFormField("keywords", "Java,upload,Spring");
+            multipart.addFormField("description", "SCIR Grievance Ticket");
             multipart.addFormField("summary", "Sample String 2016-01-19 11:02");
-//            multipart.addFormField("type", "Road");
             multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
             multipart.addFormField("severity", TICKET_SEVERITY.Urgent.toString());
             multipart.addFormField("deviceId", mScirDataInfraFeedbackPoint.getScirDataDeviceId());
@@ -206,17 +127,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
             Log.i("CLientApp", "Level C1.1");
             multipart.addFilePart("imgFile", fileName, mCameraData, mCameraData.length);
-//            multipart.addFilePart("fileUpload", fileName);
-//            multipart.addFilePart("fileUpload", uploadFile2);
 
             List<String> response = multipart.finish();
 
-            System.out.println("SERVER REPLIED:");
-            Log.i("ClientApp", "SERVER REPLY");
-
             //display what returns the POST request
             for (String line : response) {
-                System.out.println(line);
                 Log.i("ClientApp", line);
             }
         } catch (MalformedURLException eURL) {
@@ -230,43 +145,47 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         return true;
     }
 
-    public void addFormPart(String paramName, String value) throws Exception {
-        writeParamData(paramName, value);
-    }
-
-    private void writeParamData(String paramName, String value) throws Exception {
-        os.write( (delimiter + boundary + "\r\n").getBytes());
-        os.write( "Content-Type: text/plain\r\n".getBytes());
-        os.write( ("Content-Disposition: form-data; name=\"" + paramName + "\"\r\n").getBytes());;
-        os.write( ("\r\n" + value + "\r\n").getBytes());
-
-    }
     private OnClickListener mScirFeedbackButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
             if (mCameraData != null) {
                 // TODO : This is final processing stage of all submitted contents
+                Double lat, lon ;
+                long dateTime ;
                 TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
                 mScirDataMobileNumber = tm.getLine1Number();
                 mScirDataDeviceId = tm.getDeviceId();
                 if (mScirDataMobileNumber == null) mScirDataMobileNumber = "UNAVAILABLE";
                 if (mScirDataDeviceId == null) mScirDataDeviceId = "NOT_AVAILABLE";
 
-
+                if( MainActivity.mScirCurrentLocation == null ) {
+                    lat = 12.0;
+                    lon = 23.0;
+                    dateTime = 1234567;
+                } else {
+                    lat = MainActivity.mScirCurrentLocation.getLatitude();
+                    lon = MainActivity.mScirCurrentLocation.getLongitude();
+                    dateTime = MainActivity.mScirCurrentLocation.getTime();
+                }
                 mScirDataInfraFeedbackPoint = new ScirInfraFeedbackPoint(
-                        MainActivity.mScirCurrentLocation.getLatitude(),
-                        MainActivity.mScirCurrentLocation.getLongitude(),
-                        MainActivity.mScirCurrentLocation.getTime(),
+                        lat, lon, dateTime,
                         mCameraData,
                         mScirDataProblemType, mScirDataProblemSeverityLevel,
                         mScirDataMobileNumber, mScirDataDeviceId,
                         "<<Description>>");
-
-
-                SaveData(); // TODO: To be cleaned up and removed !! after below is in order
                 new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
-//                reportInfraProblemToBackEnd(mScirDataInfraFeedbackPoint);
+                String dataSubmitted =
+                        "Data Submitted to backend:" +
+                                "Lat:" + mScirDataInfraFeedbackPoint.getScirDataLat()  +
+                                "Long:" + mScirDataInfraFeedbackPoint.getScirDataLong()  +
+                                "DateTime:" + mScirDataInfraFeedbackPoint.getScirDataDateTime() +
+                                "Problem: " + mScirDataProblemType.toString() +
+                                "Severity: " + mScirDataProblemSeverityLevel +
+                                "Mobile :" + mScirDataInfraFeedbackPoint.getScirDataMobileNumber() +
+                                "";
+                Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
             } else {
+                Toast.makeText(CameraActivity.this, "Can't submit data due to some problem", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_CANCELED);
             }
             finish();
@@ -326,7 +245,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
         mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
         mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
-        // mScirCtlSeveritySeekBar = (SeekBar) findViewById(R.id.scirCtrlSeekBar);
 
         // TODO: Remove any default settings selection to provide true picture to end user
         mScirCtlRadioGroupProblemType.invalidate();
@@ -334,7 +252,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
         mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
         mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
-        // mScirCtlSeveritySeekBar.setOnSeekBarChangeListener(mScirSeverityLevelSeekBarListener);
     }
 
     /******************************************************************
@@ -472,8 +389,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
 
     class SubmitDataToBackEndTask extends AsyncTask<ScirInfraFeedbackPoint, Void, Void> {
-//            String, Void, RSSFeed>
-
         private Exception exception;
         ScirInfraFeedbackPoint mFeedbackPoint ;
 
@@ -492,8 +407,5 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             // TODO: do something with the feed
         }
     }
-
-
-
 
 }

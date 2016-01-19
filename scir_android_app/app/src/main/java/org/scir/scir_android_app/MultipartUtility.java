@@ -3,6 +3,9 @@ package org.scir.scir_android_app;
 
 /**
  * Taken up from standard library avaialble on site codejava.net on 14-01-2016.
+ *
+ * Added method to submit form-data for a file from byte[] array passed (20160-01-18)
+ *
  */
 
 
@@ -139,7 +142,6 @@ public class MultipartUtility {
         writer.flush();
 
         final int BUFFER_SIZE = 4096 ;
-//        int bytesSize = content.length ;
         Log.i("AppSCIR", "Total size" + Integer.valueOf(bytesSize));
         for(int i = 0 ; i <= bytesSize ; i+=BUFFER_SIZE) {
             if( (bytesSize - i ) < BUFFER_SIZE) {
@@ -147,7 +149,6 @@ public class MultipartUtility {
                 Log.i("AppSCIR", "iteration last also being done:" + Integer.valueOf(i));
             } else {
                 outputStream.write(content, i, (BUFFER_SIZE));
-                Log.i("AppSCIR", "iteration till :" + Integer.valueOf(i));
             }
         }
         outputStream.flush();

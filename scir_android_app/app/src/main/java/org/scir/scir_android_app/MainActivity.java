@@ -58,30 +58,20 @@ public class MainActivity extends Activity {
             int method = 2 ;
             if( method == 2 ) {
                 mScirLocationCallBack =
-                    new SingleShotLocationProvider.LocationCallback() {
-                    @Override public void onNewLocationAvailable(Location location) {
-                        mScirCurrentLocation = location ;
-                        Log.d("Location", "my location is " + location.toString());
-                        Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_SHORT).show();
-                        if( mTextViewGeoLocationStatus != null ) {
-                            mTextViewGeoLocationStatus.setTextColor(Color.rgb(0, 255, 0));
-                            mTextViewGeoLocationStatus.setText("GOT GeoLocation! Please proceed...");
-                        }
-                    }};
+                        new SingleShotLocationProvider.LocationCallback() {
+                            @Override public void onNewLocationAvailable(Location location) {
+                                mScirCurrentLocation = location ;
+                                Log.d("Location", "my location is " + location.toString());
+                                Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_SHORT).show();
+                                if( mTextViewGeoLocationStatus != null ) {
+                                    mTextViewGeoLocationStatus.setTextColor(Color.rgb(0, 255, 0));
+                                    mTextViewGeoLocationStatus.setText("GOT GeoLocation! Capture photo .... ");
+                                }
+                            }};
                 SingleShotLocationProvider.requestSingleUpdate(this.getBaseContext(), mScirLocationCallBack);
             } else {
                 /*
-                // final LocationManager locationManager = (LocationManager) Context.getSystemService(Context.LOCATION_SERVICE);
-                scirLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 mScirLocationFinder = new SCIRLocationFinder();
-                scirLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mScirLocationFinder);
-                mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-                // mScirLocationFinder.updateBestLocation(scirLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-                if (mScirLocationFinder.isLocationQualityGood() ) {
-                    // Can go ahead with capturing of photo quality...
-                } else {
-                    // Need to tell user to wait for capturing problem
-                }
                 */
             }
         } catch(SecurityException se) {
@@ -140,7 +130,6 @@ public class MainActivity extends Activity {
 
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == TAKE_PICTURE_REQUEST_B) {
@@ -151,7 +140,6 @@ public class MainActivity extends Activity {
                     mCameraBitmap = null;
                 }
                 Bundle extras = data.getExtras();
- //               mCameraBitmap = (Bitmap) extras.get("data");
                 byte[] cameraData = extras.getByteArray(CameraActivity.EXTRA_CAMERA_DATA);
                 if (cameraData != null) {
                     mCameraBitmap = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);

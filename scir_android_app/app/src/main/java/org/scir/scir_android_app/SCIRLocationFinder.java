@@ -7,6 +7,10 @@ import android.os.Bundle;
 
 /**
  * Created by khelender on 26-12-2015.
+ *
+ * NOT GETTING USED as on 2016-01-19
+ *
+ *
  */
 public class SCIRLocationFinder implements LocationListener {
 
