@@ -51,6 +51,15 @@ import android.widget.Toast;
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
 
     public static enum TICKET_SEVERITY {INVALID, Low, Normal, High, Urgent};
+    public static enum SCIR_PROBLEM_TYPE {
+        None,
+        Electricity,
+        Road,
+        Sanitation,
+        Sewage,
+        Water,
+        Other
+    };
 
     public static final String EXTRA_CAMERA_DATA = "camera_data";
     private static final String KEY_IS_CAPTURING = "is_capturing";
@@ -73,16 +82,14 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     final String uploadFilePath = "/mnt/sdcard/saved_data";
     final String uploadFileName = "service_lifecycle.png";
 
-    public enum SCIR_PROBLEM_TYPE {
-        E_SCIR_WATER,
-        E_SCIR_ELECTRICITY,
-        E_SCIR_ROAD,
-        E_SCIR_SANITATION,
-        E_SCIR_POLLUTION,
-        E_SCIR_OTHER
-    }
-
-    ;
+//    public enum SCIR_PROBLEM_TYPE {
+//        E_SCIR_WATER,
+//        E_SCIR_ELECTRICITY,
+//        E_SCIR_ROAD,
+//        E_SCIR_SANITATION,
+//        E_SCIR_POLLUTION,
+//        E_SCIR_OTHER
+//    }
 
     private double mScirDataLat, mScirDataLong;
     private long mScirDataDateTime;
@@ -173,9 +180,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         DataOutputStream dos = null ;
 
         String charset = "UTF-8";
-        File uploadFile1 = new File("e:/Test/PIC1.JPG");
-        File uploadFile2 = new File("e:/Test/PIC2.JPG");
-        String requestURL = "http://192.168.1.104:8080/smart-city/AddTicket";
+        String requestURL = "http://192.168.1.100:8080/smart-city/AddTicket";
+//        String requestURL = "http://192.168.1.125:9999/SmartCity/AddTicket";
         String fileName = uploadFilePath + uploadFileName ;
 
 
@@ -184,23 +190,19 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
             multipart.addHeaderField("User-Agent", "SCIR");
             multipart.addHeaderField("Test-Header", "Header-Value");
-//            multipart.addHeaderField("Connection", "Keep-Alive");
-//            multipart.addHeaderField("ENCTYPE", "multipart/form-data");
-            Log.i("CLientApp", "Level C1.0");
+            Log.i("CLientApp", "Level C1.0 2016-01-19 11:02");
 
             multipart.addFormField("description", "Cool Pictures");
             multipart.addFormField("keywords", "Java,upload,Spring");
-            multipart.addFormField("summary", "Sample String");
-//            multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
+            multipart.addFormField("summary", "Sample String 2016-01-19 11:02");
+//            multipart.addFormField("type", "Road");
+            multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
             multipart.addFormField("severity", TICKET_SEVERITY.Urgent.toString());
-            multipart.addFormField("type", "Road");
-//            multipart.addFormField("severity", "Low");
-//            multipart.addFormField("imgFile", fileName);
             multipart.addFormField("deviceId", mScirDataInfraFeedbackPoint.getScirDataDeviceId());
             multipart.addFormField("msisdn", mScirDataInfraFeedbackPoint.getScirDataMobileNumber());
-            multipart.addFormField("latitude", "12.34");
-            multipart.addFormField("longitude", "3.8");
-            multipart.addFormField("time", "123434");
+            multipart.addFormField("latitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLat()));
+            multipart.addFormField("longitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLong()));
+            multipart.addFormField("time", String.valueOf(mScirDataInfraFeedbackPoint.getScirDataDateTime()));
 
             Log.i("CLientApp", "Level C1.1");
             multipart.addFilePart("imgFile", fileName, mCameraData, mCameraData.length);
@@ -276,19 +278,19 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         public void onCheckedChanged(RadioGroup group, int checkedId) {
             switch (checkedId) {
                 case R.id.scirCtrlRadioSelectElectricity:
-                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_ELECTRICITY;
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.Electricity;
                     break;
                 case R.id.scirCtrlRadioSelectWater:
-                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_WATER;
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.Water;
                     break;
                 case R.id.scirCtrlRadioSelectPollution:
-                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_POLLUTION;
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.Sewage;
                     break;
                 case R.id.scirCtrlRadioSelectRoad:
-                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_ROAD;
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.Road;
                     break;
                 default:
-                    mScirDataProblemType = SCIR_PROBLEM_TYPE.E_SCIR_OTHER;
+                    mScirDataProblemType = SCIR_PROBLEM_TYPE.Other;
                     break;
             }
         }
