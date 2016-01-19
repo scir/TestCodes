@@ -6,7 +6,7 @@ package org.scir.scir_android_app;
 public class ScirInfraFeedbackPoint {
     private double mScirDataLat, mScirDataLong;
     private long mScirDataDateTime ;
-    private float mScirDataProblemSeverityLevel;
+    private CameraActivity.SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel;
     private CameraActivity.SCIR_PROBLEM_TYPE mScirDataProblemType ;
     private String mScirDataMobileNumber ;
     private String mScirDataDeviceId ;
@@ -16,7 +16,8 @@ public class ScirInfraFeedbackPoint {
 
     public ScirInfraFeedbackPoint(double mScirDataLat, double mScirDataLong, long mScirDataDateTime,
                                   byte []mScirDataCameraImage,
-                                  CameraActivity.SCIR_PROBLEM_TYPE mScirDataProblemType, float mScirDataProblemSeverityLevel,
+                                  CameraActivity.SCIR_PROBLEM_TYPE mScirDataProblemType,
+                                  CameraActivity.SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel,
                                   String mScirDataMobileNumber, String mScirDataDeviceId,
                                   String mScirDataFeedbackDescription) {
         this.mScirDataLat = mScirDataLat;
@@ -48,7 +49,7 @@ public class ScirInfraFeedbackPoint {
         return mScirDataCameraImage;
     }
 
-    public float getScirDataProblemSeverityLevel() {
+    public CameraActivity.SCIR_TICKET_SEVERITY getScirDataProblemSeverityLevel() {
         return mScirDataProblemSeverityLevel;
     }
     public CameraActivity.SCIR_PROBLEM_TYPE getScirDataProblemType() {
@@ -73,10 +74,10 @@ public class ScirInfraFeedbackPoint {
     public void setScirDataDateTime(long mScirDataDateTime) {
         this.mScirDataDateTime = mScirDataDateTime;
     }
-    public void setScirDataProblemSeverityLevel(float mScirDataProblemSeverityLevel) {
+    public void setScirDataProblemSeverityLevel(CameraActivity.SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel) {
         this.mScirDataProblemSeverityLevel = mScirDataProblemSeverityLevel;
     }
-    public void setScirDataProblemType(SCIR_PROBLEM_TYPE mScirDataProblemType) {
+    public void setScirDataProblemType(CameraActivity.SCIR_PROBLEM_TYPE mScirDataProblemType) {
         this.mScirDataProblemType = mScirDataProblemType;
     }
     public void setScirDataMobileNumber(String mScirDataMobileNumber) {
@@ -86,6 +87,4 @@ public class ScirInfraFeedbackPoint {
         this.mScirDataDeviceId = mScirDataDeviceId;
     }
     */
-
-
 }

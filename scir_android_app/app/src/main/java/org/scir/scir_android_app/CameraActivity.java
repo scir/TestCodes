@@ -1,7 +1,5 @@
 package org.scir.scir_android_app;
 
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -16,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
-import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -33,8 +30,6 @@ import android.widget.Toast;
 
 
 
-// import org.scir.scir_android_app.SCIRLocationFinder ;
-
 /**
  * Functionalities to be added / enhanced (TODO):
  * 1) In case of high resolution mobile cameras, photos with some minimum size should be captured, otherwise it will overload system
@@ -46,14 +41,22 @@ import android.widget.Toast;
 
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
 
-    public static enum TICKET_SEVERITY {INVALID, Low, Normal, High, Urgent};
+//    public static enum TICKET_SEVERITY
+    public static enum SCIR_TICKET_SEVERITY {
+        INVALID,
+        NoProblem,
+        Low,
+        Normal,
+        High,
+        Urgent
+    };
     public static enum SCIR_PROBLEM_TYPE {
         None,
         Electricity,
         Road,
-        Sanitation,
         Sewage,
         Water,
+        Sanitation,
         Other
     };
 
@@ -77,7 +80,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
     private String mScirDataMobileNumber;
     private String mScirDataDeviceId;
-    private float mScirDataProblemSeverityLevel;
+//    private float mScirDataProblemSeverityLevel;
+    private SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel;
     private SCIR_PROBLEM_TYPE mScirDataProblemType;
 
     private int mServerResponseCode = 0;
@@ -118,7 +122,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             multipart.addFormField("description", "SCIR Grievance Ticket");
             multipart.addFormField("summary", "Sample String 2016-01-19 11:02");
             multipart.addFormField("type", mScirDataInfraFeedbackPoint.getScirDataProblemType().toString());
-            multipart.addFormField("severity", TICKET_SEVERITY.Urgent.toString());
+            multipart.addFormField("severity", mScirDataInfraFeedbackPoint.getScirDataProblemSeverityLevel().toString());
             multipart.addFormField("deviceId", mScirDataInfraFeedbackPoint.getScirDataDeviceId());
             multipart.addFormField("msisdn", mScirDataInfraFeedbackPoint.getScirDataMobileNumber());
             multipart.addFormField("latitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLat()));
@@ -236,7 +240,20 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         @Override
         public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
             /* Set rating level */
-            mScirDataProblemSeverityLevel = rating;
+//            mScirDataProblemSeverityLevel = rating;
+            if( rating < 1.0) {
+                mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.NoProblem ;
+            } else if( rating <= 2.0) {
+                mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.Low;
+            } else if (rating <= 3.0) {
+                mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.Normal;
+            } else if (rating <= 4.0 ) {
+                mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.High;
+            } else if (rating <= 5.0 ) {
+                mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.Urgent;
+            } else {
+                mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.INVALID ;
+            }
         }
     };
 
@@ -247,7 +264,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
 
         // TODO: Remove any default settings selection to provide true picture to end user
-        mScirCtlRadioGroupProblemType.invalidate();
+//        mScirCtlRadioGroupProblemType.invalidate();
+        mScirCtlRadioGroupProblemType.setSelected(false);
 
         mScirCtlRadioGroupProblemType.setOnCheckedChangeListener(mScirProblemTypeGroupChangeListener);
         mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
