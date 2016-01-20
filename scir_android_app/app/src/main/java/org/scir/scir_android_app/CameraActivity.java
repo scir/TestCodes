@@ -3,8 +3,7 @@ package org.scir.scir_android_app;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-
-import java.io.DataOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -24,7 +23,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 
@@ -41,24 +39,23 @@ import android.widget.Toast;
 
 public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
 
-//    public static enum TICKET_SEVERITY
-    public static enum SCIR_TICKET_SEVERITY {
+    public enum SCIR_TICKET_SEVERITY {
         INVALID,
         NoProblem,
         Low,
         Normal,
         High,
         Urgent
-    };
-    public static enum SCIR_PROBLEM_TYPE {
+    }
+    public enum SCIR_PROBLEM_TYPE {
         None,
         Electricity,
         Road,
         Sewage,
         Water,
-        Sanitation,
+//        Sanitation,
         Other
-    };
+    }
 
     public static final String EXTRA_CAMERA_DATA = "camera_data";
     private static final String KEY_IS_CAPTURING = "is_capturing";
@@ -68,23 +65,19 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private SurfaceView mCameraPreview;
     private Button mCaptureImageButton;
     private byte[] mCameraData;
+    private byte[] mCameraDataCompressed;
     private boolean mIsCapturing;
 
 
-    private RadioGroup mScirCtlRadioGroupProblemType;
     private RatingBar mScirCtlProblemSeverityRating;
-    private SeekBar mScirCtlSeveritySeekBar;
     private Button mScirCtlButtonSubmitFeedback;
 
     ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint;
 
     private String mScirDataMobileNumber;
     private String mScirDataDeviceId;
-//    private float mScirDataProblemSeverityLevel;
     private SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel;
     private SCIR_PROBLEM_TYPE mScirDataProblemType;
-
-    private int mServerResponseCode = 0;
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
@@ -101,17 +94,18 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     };
 
     private boolean reportInfraProblemToBackEnd(ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint) {
-        DataOutputStream dos = null ;
+        String charset = "UTF-8", requestURL = "";
+//        requestURL = "http://192.168.1.100:8080/smart-city/AddTicket";
+//        requestURL = "http://192.168.1.123:9999/SmartCity/AddTicket";
+//        requestURL = "http://103.242.62.23:9999/SmartCity/AddTicket";
+//        requestURL = "http://sasan.twilightparadox.com:9999/SmartCity/AddTicket";
 
-        String charset = "UTF-8";
-        String requestURL = "http://192.168.1.100:8080/smart-city/AddTicket";
-//        String requestURL = "http://192.168.1.125:9999/SmartCity/AddTicket";
-//        final String uploadFilePath = "/mnt/sdcard/saved_data";
-//        final String uploadFileName = "service_lifecycle.png";
-//        String fileName = uploadFilePath + uploadFileName ;
+        requestURL = "http://103.242.62.23:8080/smart-city/AddTicket";
+
         String fileName = "Image" +
 //                "_" + mScirDataMobileNumber.substring(1) + "_" + Long.toString(mScirDataInfraFeedbackPoint.getScirDataDateTime()) +
                 ".jpg" ;
+        String fullResponse = "";
 
         try {
             MultipartUtility multipart = new MultipartUtility(requestURL, charset);
@@ -127,26 +121,47 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             multipart.addFormField("msisdn", mScirDataInfraFeedbackPoint.getScirDataMobileNumber());
             multipart.addFormField("latitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLat()));
             multipart.addFormField("longitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLong()));
-            multipart.addFormField("time", String.valueOf(mScirDataInfraFeedbackPoint.getScirDataDateTime()));
+            multipart.addFormField("time", String.valueOf(mScirDataInfraFeedbackPoint.getScirDataDateTimeFEServerForamt()));
+//            multipart.addFormField("time", String.valueOf(mScirDataInfraFeedbackPoint.getScirDataDateTime()));
+//            multipart.addFormField("time", "2016-01-19 15:37:00");
 
             Log.i("CLientApp", "Level C1.1");
-            multipart.addFilePart("imgFile", fileName, mCameraData, mCameraData.length);
+
+            multipart.addFilePart("imgFile", fileName, mCameraDataCompressed, mCameraDataCompressed.length);
+            // Hack for checking upload speed
+//            byte [] altCameraData = Arrays.copyOfRange(mCameraData, 0, 128);
+//            multipart.addFilePart("imgFile", fileName, altCameraData, altCameraData.length);
 
             List<String> response = multipart.finish();
 
             //display what returns the POST request
             for (String line : response) {
                 Log.i("ClientApp", line);
+                fullResponse = fullResponse.concat(line);
             }
         } catch (MalformedURLException eURL) {
             eURL.printStackTrace();
+            fullResponse = fullResponse.concat(eURL.toString());
         } catch (IOException ex) {
-            System.err.println(ex);
+            ex.printStackTrace();
+            fullResponse = fullResponse.concat(ex.toString());
         } catch (Exception e) {
             e.printStackTrace();
+            fullResponse = fullResponse.concat(e.toString());
+        } finally {
+            Toast.makeText(CameraActivity.this, fullResponse, Toast.LENGTH_LONG).show();
         }
-
         return true;
+    }
+
+    byte[] resizeImage(byte[] input, int PhotoWidth, int PhotoHeight) {
+        Bitmap original = BitmapFactory.decodeByteArray(input , 0, input.length);
+        Bitmap resized = Bitmap.createScaledBitmap(original, PhotoWidth, PhotoHeight, true);
+
+        ByteArrayOutputStream blob = new ByteArrayOutputStream();
+        resized.compress(Bitmap.CompressFormat.JPEG, 100, blob);
+
+        return blob.toByteArray();
     }
 
     private OnClickListener mScirFeedbackButtonClickListener = new OnClickListener() {
@@ -180,16 +195,16 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
                 new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
                 String dataSubmitted =
                         "Data Submitted to backend:" +
-                                "Lat:" + mScirDataInfraFeedbackPoint.getScirDataLat()  +
-                                "Long:" + mScirDataInfraFeedbackPoint.getScirDataLong()  +
-                                "DateTime:" + mScirDataInfraFeedbackPoint.getScirDataDateTime() +
-                                "Problem: " + mScirDataProblemType.toString() +
-                                "Severity: " + mScirDataProblemSeverityLevel +
-                                "Mobile :" + mScirDataInfraFeedbackPoint.getScirDataMobileNumber() +
+                                "\nLat:" + mScirDataInfraFeedbackPoint.getScirDataLat()  +
+                                "\nLong:" + mScirDataInfraFeedbackPoint.getScirDataLong()  +
+                                "\nDateTime:" + mScirDataInfraFeedbackPoint.getScirDataDateTime() +
+                                "\nProblem: " + mScirDataProblemType.toString() +
+                                "\nSeverity: " + mScirDataProblemSeverityLevel +
+                                "\nMobile :" + mScirDataInfraFeedbackPoint.getScirDataMobileNumber() +
                                 "";
                 Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(CameraActivity.this, "Can't submit data due to some problem", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraActivity.this, "Can't submit data due to some problem", Toast.LENGTH_LONG).show();
                 setResult(RESULT_CANCELED);
             }
             finish();
@@ -219,23 +234,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     };
 
-    private SeekBar.OnSeekBarChangeListener mScirSeverityLevelSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-
-        }
-    };
-
     private RatingBar.OnRatingBarChangeListener mScirSeverityLevelRatingBarListener = new RatingBar.OnRatingBarChangeListener() {
         @Override
         public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -258,7 +256,9 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     };
 
 
-    private void setupScirEnvProblemCapturing() {
+    private void setupScirEnvForGrievanceCapturing() {
+        RadioGroup mScirCtlRadioGroupProblemType ;
+
         mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
         mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
         mScirCtlButtonSubmitFeedback = (Button) findViewById(R.id.scirCtrlButtonFeedback);
@@ -275,10 +275,9 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     /******************************************************************
      * Main Activity
      *
-     * @param savedInstanceState
+     * @param savedInstanceState : Saved Instance State
      *****************************************************************
      */
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -290,7 +289,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
         mCameraImage.setVisibility(View.INVISIBLE);
 
-        setupScirEnvProblemCapturing();
+        setupScirEnvForGrievanceCapturing();
 
         mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
@@ -352,7 +351,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        mCameraData = data;
+//        (< 1/4 of VGA)
+        final int PHOTO_WIDTH = 100 ;
+        final int PHOTO_HEIGHT = 75 ;
+        mCameraData = data ;
+        mCameraDataCompressed = resizeImage(data, PHOTO_WIDTH, PHOTO_HEIGHT);
         setupImageDisplay();
     }
 

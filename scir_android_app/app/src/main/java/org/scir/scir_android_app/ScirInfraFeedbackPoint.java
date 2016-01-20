@@ -1,5 +1,9 @@
 package org.scir.scir_android_app;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by khelender on 06-01-2016.
  */
@@ -35,15 +39,20 @@ public class ScirInfraFeedbackPoint {
         this.mScirDataFeedbackDescription = mScirDataFeedbackDescription ;
     }
 
-    public double getScirDataLat() {
-        return mScirDataLat;
-    }
+    public double getScirDataLat() { return mScirDataLat; }
     public double getScirDataLong() {
         return mScirDataLong;
     }
     public long getScirDataDateTime() {
         return mScirDataDateTime;
     }
+    public String getScirDataDateTimeFEServerForamt() {
+        Date date = new Date(mScirDataDateTime);
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormatter.format(date);
+
+    }
+
 
     public byte[] getmScirDataCameraImage() {
         return mScirDataCameraImage;

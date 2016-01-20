@@ -10,6 +10,10 @@
     <string name="done">Report SCIR Feedback</string>
     <string name="title_activity_check_location">CheckLocationActivity</string>
 
+    <string name="strScirBuildName">2016-01-20_11:29</string>
+    <string name="strSmartCityView">Smart City View</string>
+    <string name="strSmartCityLogo">Smart City Logo</string>
+
     <string name="strTextViewGeoLocationStatus">Wait... Fetching Location</string>
     <string name="strTextViewGeoLocationStatusDone">Geo Location Updated! Proceed with Capture...</string>
 

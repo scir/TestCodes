@@ -19,8 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Functionalities to be added / enhanced :
+ * TODO: Functionalities to be added / enhanced :
  * 1) Location should be predicted accurately in a speedy manner using Location Services (out of speed and accuracy, ACCURACY has higher priority.
+ * 2) Size of image captured should be small enough (of order of less than 100K)
  */
 
 public class MainActivity extends Activity {
