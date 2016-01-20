@@ -95,16 +95,18 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
     private boolean reportInfraProblemToBackEnd(ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint) {
         String charset = "UTF-8", requestURL = "";
+        // For PC configuration
 //        requestURL = "http://192.168.1.100:8080/smart-city/AddTicket";
 //        requestURL = "http://192.168.1.123:9999/SmartCity/AddTicket";
 //        requestURL = "http://103.242.62.23:9999/SmartCity/AddTicket";
 //        requestURL = "http://sasan.twilightparadox.com:9999/SmartCity/AddTicket";
+        requestURL = "http://smartcity.dlinkddns.com:9999/SmartCity/AddTicket";
 
-        requestURL = "http://103.242.62.23:8080/smart-city/AddTicket";
+        // For laptop configuration
+//        requestURL = "http://103.242.62.23:8080/smart-city/AddTicket";
+//        requestURL = "http://sasan.twilightparadox.com:8080/smart-city/AddTicket";
 
-        String fileName = "Image" +
-//                "_" + mScirDataMobileNumber.substring(1) + "_" + Long.toString(mScirDataInfraFeedbackPoint.getScirDataDateTime()) +
-                ".jpg" ;
+        String fileName = "Image.jpg" ;
         String fullResponse = "";
 
         try {
