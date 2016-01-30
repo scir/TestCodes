@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,6 +18,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * TODO: Functionalities to be added / enhanced :
@@ -41,9 +45,9 @@ public class MainActivity extends Activity {
     ImageView imgLogo ;
     ImageView imgSmartCityPhoto ;
 
-    private LocationManager scirLocationManager ;
-    public static SCIRLocationFinder mScirLocationFinder ;
     private SingleShotLocationProvider.LocationCallback mScirLocationCallBack;
+    private Runnable mRegularLocationUpdater = null ;
+    private android.os.Handler mLocationHandler = null ;
     public static Location mScirCurrentLocation ;
 
 
@@ -54,26 +58,51 @@ public class MainActivity extends Activity {
         }
     };
 
+    static enum SCIR_LOCATION_SERVICE {
+        SCIR_LOCATION_SERVICE_INVALID,
+        SCIR_LOCATION_SERVICE_COMPLETE_LOCATION,
+        SCIR_LOCATION_SERVICE_ONE_SHOT_LOCATION
+    };
+    SCIR_LOCATION_SERVICE mScirLocationService = SCIR_LOCATION_SERVICE.SCIR_LOCATION_SERVICE_ONE_SHOT_LOCATION;
     private void setupLocationServices() {
         try {
-            int method = 2 ;
-            if( method == 2 ) {
-                mScirLocationCallBack =
-                        new SingleShotLocationProvider.LocationCallback() {
-                            @Override public void onNewLocationAvailable(Location location) {
-                                mScirCurrentLocation = location ;
-                                Log.d("Location", "my location is " + location.toString());
-                                Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_SHORT).show();
-                                if( mTextViewGeoLocationStatus != null ) {
-                                    mTextViewGeoLocationStatus.setTextColor(Color.rgb(0, 255, 0));
-                                    mTextViewGeoLocationStatus.setText("GOT GeoLocation! Capture photo .... ");
-                                }
-                            }};
-                SingleShotLocationProvider.requestSingleUpdate(this.getBaseContext(), mScirLocationCallBack);
-            } else {
-                /*
-                mScirLocationFinder = new SCIRLocationFinder();
-                */
+            switch( mScirLocationService ) {
+                case SCIR_LOCATION_SERVICE_COMPLETE_LOCATION:
+                    // Method # 1
+                    // To be enabled in future after proper take care....
+                    startLocationActivity();
+                    break;
+                case SCIR_LOCATION_SERVICE_ONE_SHOT_LOCATION:
+                case SCIR_LOCATION_SERVICE_INVALID:
+                default:
+                    mScirLocationCallBack =
+                            new SingleShotLocationProvider.LocationCallback() {
+                                @Override public void onNewLocationAvailable(Location location) {
+                                    mScirCurrentLocation = location ;
+                                    String strLocation = String.format("(%.3f, %.3f)",location.getLatitude(), location.getLongitude());
+                                    Log.i("Location", "my location is " + location.toString());
+//                                    Toast.makeText(getBaseContext(),"my location is " + location.toString(), Toast.LENGTH_SHORT).show();
+                                    if( mTextViewGeoLocationStatus != null ) {
+                                        mTextViewGeoLocationStatus.setTextColor(Color.rgb(0, 255, 128));
+                                        mTextViewGeoLocationStatus.setText("Geo " + strLocation + ". Capture photo.");
+                                    }
+                                }};
+                    mLocationHandler = new android.os.Handler();
+                    mRegularLocationUpdater = new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                SingleShotLocationProvider.requestSingleUpdate(getBaseContext(), mScirLocationCallBack);
+                            } finally {
+                                // Reschedule it for repeat here !!
+                                // Future fetches programming through Timer : 12 seconds
+                                mLocationHandler.postDelayed(mRegularLocationUpdater, 12*1000);
+                            }
+                        }
+                    };
+                    mLocationHandler.postDelayed(mRegularLocationUpdater, 0);
+                    break ;
+
             }
         } catch(SecurityException se) {
             Toast.makeText(MainActivity.this, "Unable to setup Security Exception.....", Toast.LENGTH_LONG).show();
@@ -83,19 +112,21 @@ public class MainActivity extends Activity {
     }
 
 
+    private void startLocationActivity() {
+        if (mIntentLocationCheck == null ) {
+            mIntentLocationCheck = new Intent(MainActivity.this, CheckLocationActivity.class);
+        }
+        if( mIntentLocationCheck != null ) {
+            startActivityForResult(mIntentLocationCheck, TAKE_PICTURE_REQUEST_B);
+        } else {
+            // TODO : Show error alert
+        }
+    }
 
     private OnClickListener mLocationCheckButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (mIntentLocationCheck == null ) {
-                mIntentLocationCheck = new Intent(MainActivity.this, CheckLocationActivity.class);
-            }
-            if( mIntentLocationCheck != null ) {
-                startActivityForResult(mIntentLocationCheck, TAKE_PICTURE_REQUEST_B);
-            } else {
-                // TODO : Show errro alert
-
-            }
+            startLocationActivity();
         }
     };
 
@@ -155,6 +186,7 @@ public class MainActivity extends Activity {
     }
 
     private void startInfraProblemCapture() {
+        // Start intent (view window) that provides interface to capture infra problem
         startActivityForResult(new Intent(MainActivity.this, CameraActivity.class), TAKE_PICTURE_REQUEST_B);
     }
 

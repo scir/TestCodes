@@ -25,8 +25,17 @@ import android.widget.Toast;
 
 public class CheckLocationActivity extends AppCompatActivity {
 
-    LocationManager locationManager;
-    double longitudeBest, latitudeBest;
+    double longitudeBest;
+    double latitudeBest;
+    long dateTimeBest ;
+
+    static LocationManager locationManager;
+    static Location mLocationBest = null, mLocationNetwork = null ;
+
+    static public Location getLocationBest() {
+        return mLocationBest;
+    }
+
     double longitudeGPS, latitudeGPS;
     double longitudeNetwork, latitudeNetwork;
     TextView longitudeValueBest, latitudeValueBest;
@@ -34,11 +43,28 @@ public class CheckLocationActivity extends AppCompatActivity {
     TextView longitudeValueNetwork, latitudeValueNetwork;
 
 
+    private void startupLocationServices() {
+        try {
+            locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER, 60 * 1000, 10, locationListenerNetwork);
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 2 * 60 * 1000, 10, locationListenerGPS);
+            String bestProvider = getBestProvider() ;
+            if(bestProvider != null ) {
+                locationManager.requestLocationUpdates(bestProvider, 2 * 60 * 1000, 10, locationListenerBest);
+            } else {
+                // Error Processing for updating best button and text display
+            }
+        } catch (SecurityException se) {
+            se.printStackTrace();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_location);
-        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
         longitudeValueBest = (TextView) findViewById(R.id.longitudeValueBest);
         latitudeValueBest = (TextView) findViewById(R.id.latitudeValueBest);
@@ -46,6 +72,8 @@ public class CheckLocationActivity extends AppCompatActivity {
         latitudeValueGPS = (TextView) findViewById(R.id.latitudeValueGPS);
         longitudeValueNetwork = (TextView) findViewById(R.id.longitudeValueNetwork);
         latitudeValueNetwork = (TextView) findViewById(R.id.latitudeValueNetwork);
+
+        startupLocationServices();
     }
 
     private boolean checkLocation() {
@@ -111,13 +139,7 @@ public class CheckLocationActivity extends AppCompatActivity {
                 button.setText(R.string.resume);
             }
             else {
-                Criteria criteria = new Criteria();
-                criteria.setAccuracy(Criteria.ACCURACY_FINE);
-                criteria.setAltitudeRequired(false);
-                criteria.setBearingRequired(false);
-                criteria.setCostAllowed(true);
-                criteria.setPowerRequirement(Criteria.POWER_LOW);
-                String provider = locationManager.getBestProvider(criteria, true);
+                String provider = getBestProvider();
                 if(provider != null) {
                     locationManager.requestLocationUpdates(provider, 2 * 60 * 1000, 10, locationListenerBest);
                     button.setText(R.string.pause);
@@ -128,6 +150,16 @@ public class CheckLocationActivity extends AppCompatActivity {
             se.printStackTrace();
         }
 
+    }
+
+    private String getBestProvider() {
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setCostAllowed(true);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        return locationManager.getBestProvider(criteria, true);
     }
 
     public void toggleNetworkUpdates(View view) {
@@ -152,8 +184,10 @@ public class CheckLocationActivity extends AppCompatActivity {
 
     private final LocationListener locationListenerBest = new LocationListener() {
         public void onLocationChanged(Location location) {
+            mLocationBest = location ;
             longitudeBest = location.getLongitude();
             latitudeBest = location.getLatitude();
+            dateTimeBest = location.getTime() ;
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -185,6 +219,7 @@ public class CheckLocationActivity extends AppCompatActivity {
         public void onLocationChanged(Location location) {
             longitudeNetwork = location.getLongitude();
             latitudeNetwork = location.getLatitude();
+            mLocationNetwork = location ;
 
             runOnUiThread(new Runnable() {
                 @Override

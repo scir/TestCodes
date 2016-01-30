@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/titleTextGPS"
-            android:text="@string/resume"
+            android:text="@string/pause"
             android:onClick="toggleGPSUpdates"/>
 
         <TextView
@@ -94,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/titleTextNetwork"
-            android:text="@string/resume"
+            android:text="@string/pause"
             android:onClick="toggleNetworkUpdates"/>
 
         <TextView
@@ -157,7 +157,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/titleTextBest"
-            android:text="@string/resume"
+            android:text="@string/pause"
             android:onClick="toggleBestUpdates"/>
 
         <TextView
