@@ -28,13 +28,8 @@ public class SubmitReport {
 
     public boolean reportInfraProblemToBackEnd(Activity activity) {
         String charset = "UTF-8", requestURL = "";
-        // For PC configuration
-//        requestURL = "http://192.168.0.6:8080/smart-city/AddTicket";
-//          requestURL = "http://103.242.60.127:9999/SmartCity/AddTicket";
-        requestURL = "http://smartcity.dlinkddns.com:9999/SmartCity/AddTicket";
 
-        // For laptop configuration
-//        requestURL = "http://sasan.twilightparadox.com:8080/smart-city/AddTicket";
+        requestURL = "http://sws-international.com:8080/smart-city/AddTicket";
 
         String fileName = "Image.jpg" ;
         String fullResponse = "";
@@ -94,7 +89,19 @@ public class SubmitReport {
 
         mobileNumber = tm.getLine1Number();
         deviceId = tm.getDeviceId();
-        if (mobileNumber == null) mobileNumber = "UNAVAILABLE";
+        String simNumber = tm.getSimSerialNumber();
+        String subNumber = tm.getSubscriberId();
+
+        String uniqueId ;
+        if ((mobileNumber == null) && ("".equals(simNumber)) == false) {
+            uniqueId = "M" + mobileNumber;
+        } else if( (simNumber != null) && ("".equals(simNumber) == false)) {
+            uniqueId = "S" + simNumber ;
+        } else if ((subNumber != null) && ("".equals(subNumber)) == false) {
+            uniqueId = "B" + subNumber ;
+        } else {
+            uniqueId = "UNAVAILABLE" ;
+        }
         if (deviceId == null) deviceId = "NOT_AVAILABLE";
 
         if( MainActivity.mScirCurrentLocation == null ) {
@@ -111,7 +118,7 @@ public class SubmitReport {
                 lat, lon, dateTime,
                 mCameraData, mCameraDataCompressed,
                 mScirDataInfraFeedbackPoint.getScirDataProblemType(), mScirDataInfraFeedbackPoint.getScirDataProblemSeverityLevel(),
-                mobileNumber, deviceId,
+                uniqueId, deviceId,
                 "<<Description>>", "");
         return;
     }
