@@ -64,16 +64,16 @@ if(isset($_POST['map'])) {
 	$num_rows = mysql_num_rows($result);
 	echo("Row Count=$num_rows \n");
 
-	for ($i = 0; $i < mysql_num_rows($result); $i++) 
+	for ($i = 0; $i < $num_rows ; $i++) 
 	{
 		$row = mysql_fetch_array($result, MYSQL_ASSOC);
 
-		//echo("</br><b>".$row['lat']."-".$row['lon']."::::</br>");
+		// echo("</br><b>".$row['latitude']."-".$row['longitude']."::::</br>");
 		// get latitude, longitude 
 		// create an array to put the data
 		$data_arr = array();      
 
-		array_push($data_arr, $row['lat'], $row['lon']);
+		array_push($data_arr, $row['latitude'], $row['longitude']);
 		//echo("</br><b>".$data_arr[0]."-".$data_arr[1]."aaaa</br>");
 		$data_points[$i]= $data_arr;
 		//echo("</br><b>".$data_points[$i][0]."-".$data_points[$i][1]."dddd</br>");
@@ -101,7 +101,7 @@ if(isset($_POST['map'])) {
     <script type="text/javascript">
         function init_map() {
             var myOptions = {
-                zoom: 9,
+                zoom: 15,
                 center: new google.maps.LatLng(<?php echo $latitude; ?>, <?php echo $longitude; ?>),
                 mapTypeId: google.maps.MapTypeId.ROADMAP
 			};

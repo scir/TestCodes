@@ -28,18 +28,17 @@ function getLatLongWithinRadius($rad = 30) {
 	$query = "SELECT ticket_id,latitude,longitude, (
     3959 * acos (
       cos ( radians(28.634117) )
-      * cos( radians( lat ) )
-      * cos( radians( lon ) - radians(77.342119) )
+      * cos( radians( latitude ) )
+      * cos( radians( longitude ) - radians(77.342119) )
       + sin ( radians(28.634117) )
-      * sin( radians( lat ) )
+      * sin( radians( latitude ) )
     )	) AS distance FROM sci_tickets HAVING distance < $rad"; // ORDER BY distance LIMIT 0 , 20";
-	//echo "\nquery = $query\n";
+	// echo "\nquery = $query\n";
 	$result = mysql_query($query) 
 		or die('Query failed: ' . $query . mysql_error());
-	return $result;
 	
-	/*
 	// Printing results in HTML
+	/*
 	echo "<table>\n";
 	while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		echo "\t<tr>\n";
@@ -50,6 +49,7 @@ function getLatLongWithinRadius($rad = 30) {
 	}
 	echo "</table>\n";
 	*/
+	return $result;
 }
 
 ?>
