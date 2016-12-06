@@ -28,13 +28,8 @@ public class SubmitReport {
 
     public boolean reportInfraProblemToBackEnd(Activity activity) {
         String charset = "UTF-8", requestURL = "";
-        // For PC configuration
-//        requestURL = "http://192.168.0.6:8080/smart-city/AddTicket";
-//          requestURL = "http://103.242.60.127:9999/SmartCity/AddTicket";
-        requestURL = "http://smartcity.dlinkddns.com:9999/SmartCity/AddTicket";
 
-        // For laptop configuration
-//        requestURL = "http://sasan.twilightparadox.com:8080/smart-city/AddTicket";
+        requestURL = "http://sws-international.com:8080/smart-city/AddTicket";
 
         String fileName = "Image.jpg" ;
         String fullResponse = "";
@@ -85,7 +80,7 @@ public class SubmitReport {
         return true;
     }
 
-    public void collateReport(byte[] mCameraData, byte[] mCameraDataCompressed, TelephonyManager tm) {
+    public boolean collateReport(byte[] mCameraData, byte[] mCameraDataCompressed, TelephonyManager tm) throws Exception {
         // TODO : This is final processing stage of all submitted contents
         Double lat, lon ;
         long dateTime ;
@@ -93,15 +88,26 @@ public class SubmitReport {
         String deviceId;
 
         mobileNumber = tm.getLine1Number();
+        String simNumber = tm.getSimSerialNumber();
+        String subNumber = tm.getSubscriberId();
+
+        String uniqueId ;
+        if ((mobileNumber != null) && ("".equals(mobileNumber)) == false) {
+            uniqueId = "M" + mobileNumber;
+        } else if( (simNumber != null) && ("".equals(simNumber) == false)) {
+            uniqueId = "S" + simNumber ;
+        } else if ((subNumber != null) && ("".equals(subNumber)) == false) {
+            uniqueId = "B" + subNumber ;
+        } else {
+            uniqueId = "UNAVAILABLE" ;
+        }
+
         deviceId = tm.getDeviceId();
-        if (mobileNumber == null) mobileNumber = "UNAVAILABLE";
-        if (deviceId == null) deviceId = "NOT_AVAILABLE";
+        if (deviceId == null) deviceId = "NA";
 
         if( MainActivity.mScirCurrentLocation == null ) {
             // TODO: Need to handle Errors here !!
-            lat = 12.0;
-            lon = 23.0;
-            dateTime = 1234567;
+            throw new Exception("Location not available!");
         } else {
             lat = MainActivity.mScirCurrentLocation.getLatitude();
             lon = MainActivity.mScirCurrentLocation.getLongitude();
@@ -111,9 +117,9 @@ public class SubmitReport {
                 lat, lon, dateTime,
                 mCameraData, mCameraDataCompressed,
                 mScirDataInfraFeedbackPoint.getScirDataProblemType(), mScirDataInfraFeedbackPoint.getScirDataProblemSeverityLevel(),
-                mobileNumber, deviceId,
+                uniqueId, deviceId,
                 "<<Description>>", "");
-        return;
+        return true;
     }
 
 
