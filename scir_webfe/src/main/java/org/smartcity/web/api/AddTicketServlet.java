@@ -235,8 +235,8 @@ public class AddTicketServlet extends HttpServlet {
 				String filePath = UPLOAD_PATH + imageLocation;
 				ticketAPI.createImageLocation(filePath);
 
-//				File storeFile = new File(filePath + Constants.FILE_SEPARATOR + fileName);
-				File storeFile = new File(filePath + Constants.FILE_SEPARATOR + "TestFile.png");
+				File storeFile = new File(filePath + Constants.FILE_SEPARATOR + fileName);
+				// File storeFile = new File(filePath + Constants.FILE_SEPARATOR + "TestFile.png");
 
 				// saves the file on disk
 				item.write(storeFile);
