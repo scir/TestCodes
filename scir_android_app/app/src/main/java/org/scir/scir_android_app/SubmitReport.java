@@ -80,7 +80,7 @@ public class SubmitReport {
         return true;
     }
 
-    public void collateReport(byte[] mCameraData, byte[] mCameraDataCompressed, TelephonyManager tm) {
+    public boolean collateReport(byte[] mCameraData, byte[] mCameraDataCompressed, TelephonyManager tm) throws Exception {
         // TODO : This is final processing stage of all submitted contents
         Double lat, lon ;
         long dateTime ;
@@ -88,12 +88,11 @@ public class SubmitReport {
         String deviceId;
 
         mobileNumber = tm.getLine1Number();
-        deviceId = tm.getDeviceId();
         String simNumber = tm.getSimSerialNumber();
         String subNumber = tm.getSubscriberId();
 
         String uniqueId ;
-        if ((mobileNumber == null) && ("".equals(simNumber)) == false) {
+        if ((mobileNumber != null) && ("".equals(mobileNumber)) == false) {
             uniqueId = "M" + mobileNumber;
         } else if( (simNumber != null) && ("".equals(simNumber) == false)) {
             uniqueId = "S" + simNumber ;
@@ -102,13 +101,13 @@ public class SubmitReport {
         } else {
             uniqueId = "UNAVAILABLE" ;
         }
-        if (deviceId == null) deviceId = "NOT_AVAILABLE";
+
+        deviceId = tm.getDeviceId();
+        if (deviceId == null) deviceId = "NA";
 
         if( MainActivity.mScirCurrentLocation == null ) {
             // TODO: Need to handle Errors here !!
-            lat = 12.0;
-            lon = 23.0;
-            dateTime = 1234567;
+            throw new Exception("Location not available!");
         } else {
             lat = MainActivity.mScirCurrentLocation.getLatitude();
             lon = MainActivity.mScirCurrentLocation.getLongitude();
@@ -120,7 +119,7 @@ public class SubmitReport {
                 mScirDataInfraFeedbackPoint.getScirDataProblemType(), mScirDataInfraFeedbackPoint.getScirDataProblemSeverityLevel(),
                 uniqueId, deviceId,
                 "<<Description>>", "");
-        return;
+        return true;
     }
 
 

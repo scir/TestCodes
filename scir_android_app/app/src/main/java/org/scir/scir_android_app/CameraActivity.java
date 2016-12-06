@@ -86,13 +86,18 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         public void onClick(View v) {
             TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
-            if (mCameraData != null) {
-                mSubmitReport.collateReport(mCameraData, mCameraDataCompressed, tm);
-                new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
-                String dataSubmitted = mSubmitReport.getDataSubmitted() ;
-                Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(CameraActivity.this, "Picture has not been captured!!", Toast.LENGTH_LONG).show();
+            try {
+                if (mCameraData != null) {
+                    mSubmitReport.collateReport(mCameraData, mCameraDataCompressed, tm);
+                    new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
+                    String dataSubmitted = mSubmitReport.getDataSubmitted();
+                    Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(CameraActivity.this, "Picture has not been captured!!", Toast.LENGTH_LONG).show();
+                    setResult(RESULT_CANCELED);
+                }
+            } catch(Exception e) {
+                Log.e("CameraActivity", "Error while reporting problem to backend\n" + e.getMessage());
                 setResult(RESULT_CANCELED);
             }
 
