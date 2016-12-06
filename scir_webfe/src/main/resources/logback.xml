@@ -6,7 +6,8 @@
 	</appender>
 	
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>/Applications/tomcat/logs/smartcity/smartcityapi.log</file>
+		<!--<file>/Applications/tomcat/logs/smartcity/smartcityapi.log</file>-->
+		<file>/usr/share/tomcat8/logs/smartcity/smartcityapi.log</file>
 		
 		<!-- daily Roll-over -->
         <!--rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
