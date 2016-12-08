@@ -11,11 +11,6 @@
 
 <div id="wrapper">
 <div id="header">
-<img src="images/site_logo.png" height="100" width="1400" alt="Smart City Infra Management" />
-
-<a href="show_map.php">Show Map</a> |
-<a href="show_map_within_radius.php">Show Map within radius</a> |
-<a href="show_image.php">Show Image</a> 
-| <a href="show_DB_data.php">Fetch From DB</a>
-
+<img src="images/site_logo.png" width="50%" alt="Smart City Infra Management" />
+<br>
 </div>
