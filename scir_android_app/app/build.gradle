@@ -8,8 +8,9 @@ android {
         applicationId "org.scir.scir_android_app"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 1
-        versionName "0.1a"
+        versionCode 2
+        versionName "0.2"
+//        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -25,8 +26,10 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:design:23.4.0'
+    compile 'com.google.android.gms:play-services-appindexing:9.6.1'
+    compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.android.support:support-vector-drawable:23.4.0'
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }

@@ -1,9 +1,14 @@
-package org.scir.scir_android_app;
+package org.sss.library.scir;
 
 import android.app.Activity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import org.scir.scir_android_app.MainActivity;
+import org.sss.library.MultipartUtility;
+import org.sss.library.SssPreferences;
+import org.sss.library.scir.ScirInfraFeedbackPoint;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,13 +26,16 @@ import java.util.List;
 public class SubmitReport {
 
     ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint ;
+    SssPreferences sssPreferences = null ;
 
-    SubmitReport(ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint) {
+    public SubmitReport(ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint) {
         this.mScirDataInfraFeedbackPoint = mScirDataInfraFeedbackPoint ;
+        sssPreferences = SssPreferences.getSssPreferences() ;
     }
 
     public boolean reportInfraProblemToBackEnd(Activity activity) {
         String charset = "UTF-8", requestURL = "";
+        boolean statusSuccess = false ;
 
         requestURL = "http://sws-international.com:8080/smart-city/AddTicket";
 
@@ -54,9 +62,14 @@ public class SubmitReport {
 
             Log.i("ClientApp", "Level C1.1");
 
-            byte [] dataCompressedImage = mScirDataInfraFeedbackPoint.getScirDataCameraCompressedImage();
-            multipart.addFilePart("imgFile", fileName, dataCompressedImage, dataCompressedImage.length) ;
-//            multipart.addFilePart("imgFile", fileName, altCameraData, altCameraData.length);
+            if( sssPreferences.isStoreFullPicture()) {
+                multipart.addFilePart("imgFile", fileName,
+                        mScirDataInfraFeedbackPoint.getmScirDataCameraImage(),
+                        mScirDataInfraFeedbackPoint.getmScirDataCameraImage().length);
+            } else {
+                byte [] dataCompressedImage = mScirDataInfraFeedbackPoint.getScirDataCameraCompressedImage();
+                multipart.addFilePart("imgFile", fileName, dataCompressedImage, dataCompressedImage.length) ;
+            }
 
             List<String> response = multipart.finish();
 
@@ -65,6 +78,7 @@ public class SubmitReport {
                 Log.i("ClientApp", line);
                 fullResponse = fullResponse.concat(line);
             }
+            statusSuccess = true ;
         } catch (MalformedURLException eURL) {
             eURL.printStackTrace();
             fullResponse = fullResponse.concat(eURL.toString());
@@ -77,7 +91,7 @@ public class SubmitReport {
         } finally {
             Toast.makeText(activity, fullResponse, Toast.LENGTH_LONG).show();
         }
-        return true;
+        return statusSuccess;
     }
 
     public boolean collateReport(byte[] mCameraData, byte[] mCameraDataCompressed, TelephonyManager tm) throws Exception {

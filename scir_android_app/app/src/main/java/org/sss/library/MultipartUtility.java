@@ -1,4 +1,4 @@
-package org.scir.scir_android_app;
+package org.sss.library;
 // package net.codejava.networking; // After testing move to appropriate package location !!
 
 /**

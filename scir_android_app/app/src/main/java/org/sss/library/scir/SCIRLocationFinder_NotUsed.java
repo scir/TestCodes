@@ -1,4 +1,4 @@
-package org.scir.scir_android_app;
+package org.sss.library.scir;
 
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,7 +12,8 @@ import android.os.Bundle;
  *
  *
  */
-public class SCIRLocationFinder implements LocationListener {
+
+class SCIRLocationFinder_NotUsed implements LocationListener {
 
     private Location mScirDataCurrentLocation;
     private double mScirDataLatitude = 0.0;
@@ -36,7 +37,7 @@ public class SCIRLocationFinder implements LocationListener {
         return mScirDataAccuracy;
     }
 
-    public SCIRLocationFinder() {
+    public SCIRLocationFinder_NotUsed() {
         mScirDataCurrentLocation = null ;
         mScirDataStatusProvider = LocationProvider.OUT_OF_SERVICE ;
 

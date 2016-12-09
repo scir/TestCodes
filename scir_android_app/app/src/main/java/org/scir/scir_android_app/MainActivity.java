@@ -2,7 +2,6 @@ package org.scir.scir_android_app;
 
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 
 
@@ -10,7 +9,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,8 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import org.sss.library.SssPreferences;
+import org.sss.library.location.SingleShotLocationProvider;
 
 /**
  * TODO: Functionalities to be added / enhanced :
@@ -49,6 +47,8 @@ public class MainActivity extends Activity {
     private Runnable mRegularLocationUpdater = null ;
     private android.os.Handler mLocationHandler = null ;
     public static Location mScirCurrentLocation ;
+
+    private SssPreferences sssPreferences ;
 
 
     private OnClickListener mCaptureInfraProblemButtonClickListener = new OnClickListener() {
@@ -134,6 +134,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sssPreferences = SssPreferences.getSssPreferences();
+        sssPreferences.initializePreferences(getApplicationContext());
 
         /* Prepare Status text view */
         mTextViewGeoLocationStatus = (TextView) findViewById(R.id.textViewGeoLocationStatus);

@@ -1,4 +1,4 @@
-package org.scir.scir_android_app;
+package org.sss.library.location;
 
 import android.Manifest;
 import android.content.Context;

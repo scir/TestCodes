@@ -3,7 +3,6 @@ package org.scir.scir_android_app;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import android.app.Activity;
@@ -11,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -23,7 +23,11 @@ import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
-
+import org.sss.library.SssImageLibrary;
+import org.sss.library.SssPreferences;
+import org.sss.library.handler.RequestHandlerThread;
+import org.sss.library.scir.ScirInfraFeedbackPoint;
+import org.sss.library.scir.SubmitReport;
 
 
 /**
@@ -53,7 +57,10 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private Button mScirCtlButtonSubmitFeedback;
 
     ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint;
+    RequestHandlerThread mRequestHandlerThread ;
     SubmitReport mSubmitReport ;
+
+    private SssPreferences sssPreferences ;
 
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
@@ -70,17 +77,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         }
     };
 
-
-    byte[] resizeImage(byte[] input, int PhotoWidth, int PhotoHeight) {
-        Bitmap original = BitmapFactory.decodeByteArray(input , 0, input.length);
-        Bitmap resized = Bitmap.createScaledBitmap(original, PhotoWidth, PhotoHeight, true);
-
-        ByteArrayOutputStream blob = new ByteArrayOutputStream();
-        resized.compress(Bitmap.CompressFormat.JPEG, 100, blob);
-
-        return blob.toByteArray();
-    }
-
     private OnClickListener mScirFeedbackButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -89,9 +85,21 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             try {
                 if (mCameraData != null) {
                     mSubmitReport.collateReport(mCameraData, mCameraDataCompressed, tm);
-                    new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
-                    String dataSubmitted = mSubmitReport.getDataSubmitted();
-                    Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
+                    // New Way : Simply submit the request to backend.
+                    Message msgFeedbackPoint = Message.obtain(RequestHandlerThread.getRequestHandlerThread().getSubmitHandler());
+                    msgFeedbackPoint.obj = mScirDataInfraFeedbackPoint ;
+                    msgFeedbackPoint.what = RequestHandlerThread.MSG_SCIR_FEEDBACK_POINT;
+                    msgFeedbackPoint.setTarget(RequestHandlerThread.getScirRequestProcessingHandler());
+                    msgFeedbackPoint.sendToTarget();
+                    /*
+                    {
+                        // Old way : Without message queue, send request to backend
+                        new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
+                        String dataSubmitted = mSubmitReport.getDataSubmitted();
+                        Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
+                    }
+                    */
+
                 } else {
                     Toast.makeText(CameraActivity.this, "Picture has not been captured!!", Toast.LENGTH_LONG).show();
                     setResult(RESULT_CANCELED);
@@ -151,6 +159,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        sssPreferences = SssPreferences.getSssPreferences() ;
 
         setContentView(R.layout.activity_camera);
 
@@ -167,7 +176,10 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCaptureImageButton = (Button) findViewById(R.id.capture_infra_problem_button);
         mCaptureImageButton.setOnClickListener(mCaptureImageButtonClickListener);
 
+        mRequestHandlerThread = RequestHandlerThread.getRequestHandlerThread();
+
         mIsCapturing = true;
+
     }
 
     @Override
@@ -220,10 +232,13 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
 //        (< 1/4 of VGA)
-        final int PHOTO_WIDTH = 100 ;
-        final int PHOTO_HEIGHT = 75 ;
+        final int PHOTO_WIDTH = 400 ;
+        final int PHOTO_HEIGHT = 300 ;
         mCameraData = data ;
-        mCameraDataCompressed = resizeImage(data, PHOTO_WIDTH, PHOTO_HEIGHT);
+
+        if( ! sssPreferences.isStoreFullPicture()) {
+            mCameraDataCompressed = SssImageLibrary.resizeImage(data, PHOTO_WIDTH, PHOTO_HEIGHT);
+        }
         setupImageDisplay();
     }
 
@@ -276,15 +291,18 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
 
-
     class SubmitDataToBackEndTask extends AsyncTask<ScirInfraFeedbackPoint, Void, Void> {
         private Exception exception;
         ScirInfraFeedbackPoint mFeedbackPoint ;
+        private boolean statusSuccess = false ;
 
         protected Void doInBackground(ScirInfraFeedbackPoint... feedbackPoint) {
             try {
                 this.mFeedbackPoint = feedbackPoint[0] ;
-                mSubmitReport.reportInfraProblemToBackEnd(CameraActivity.this);
+                statusSuccess = mSubmitReport.reportInfraProblemToBackEnd(CameraActivity.this);
+                if(! statusSuccess) {
+                    Toast.makeText(getApplicationContext(), "Background processing failed!!", Toast.LENGTH_LONG).show();
+                }
             } catch (Exception e) {
                 this.exception = e;
             }

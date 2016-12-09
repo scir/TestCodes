@@ -1,4 +1,6 @@
-package org.scir.scir_android_app;
+package org.sss.library.scir;
+
+import org.scir.scir_android_app.R;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
