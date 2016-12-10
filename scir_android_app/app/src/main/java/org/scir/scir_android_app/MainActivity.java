@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.sss.library.SssPreferences;
+import org.sss.library.db.ScirSqliteHelper;
 import org.sss.library.location.SingleShotLocationProvider;
 
 /**
@@ -29,6 +30,7 @@ import org.sss.library.location.SingleShotLocationProvider;
 public class MainActivity extends Activity {
 
     private static final int TAKE_PICTURE_REQUEST_B = 100;
+    private static final int SHOW_FEEDBACKS = 101;
 
     private ImageView mCameraImageView;
     private Bitmap mCameraBitmap;
@@ -156,6 +158,12 @@ public class MainActivity extends Activity {
         mLocationServicesButton.setEnabled(true);
 
         mViewReportedProblemsButton = (Button) findViewById(R.id.check_problems_reported_button);
+        mViewReportedProblemsButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startFeedbackListActivity();
+            }
+        });
 
         /* Show Startup Images for Main Activity */
         imgLogo = (ImageView) findViewById(R.id.imageView);
@@ -163,7 +171,17 @@ public class MainActivity extends Activity {
         imgSmartCityPhoto = (ImageView) findViewById(R.id.imageView2);
         imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
 
+        // For setup sqlite database
+        ScirSqliteHelper.setupSqliteDatabase(getApplicationContext());
     }
+
+    private void startFeedbackListActivity () {
+        startActivityForResult(
+                new Intent(MainActivity.this, ScirFeedbackListActivity.class),
+                SHOW_FEEDBACKS);
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

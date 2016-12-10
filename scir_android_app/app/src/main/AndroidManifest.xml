@@ -58,6 +58,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.scir.scir_android_app.MainActivity" />
         </activity>
+        <activity
+            android:name=".ScirFeedbackListActivity"
+            android:label="@string/title_activity_scir_feedback_list"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.scir.scir_android_app.MainActivity" />
+        </activity>
     </application>
 
 </manifest><!--

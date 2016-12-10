@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="org.scir.scir_android_app.ScirFeedbackListActivity"
+    tools:showIn="@layout/activity_scir_feedback_list">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:text="@string/large_text" />
+-->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="6dip" >
+
+    <!--
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:text="Code: "
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/textView1"
+                android:layout_below="@+id/textView1"
+                android:text="Name: "
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/textView2"
+                android:layout_below="@+id/textView2"
+                android:text="Continent: "
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/textView3"
+                android:layout_below="@+id/textView3"
+                android:text="Region: "
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+    -->
+
+
+        <TextView
+            android:id="@+id/id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="Id:"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/id"
+        android:layout_below="@+id/id"
+        android:text="Date" />
+
+    <TextView
+        android:id="@+id/imageSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/id"
+        android:layout_toRightOf="@+id/date"
+        android:layout_marginLeft="20dp"
+        android:background="#AAEEFF"
+        android:text="Image Size:" />
+
+
+    <TextView
+        android:id="@+id/deviceId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Device ID: "
+        android:layout_alignLeft="@+id/date"
+        android:layout_below="@+id/date"
+        android:background="#99CCCC"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/uniqueId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/deviceId"
+        android:layout_toRightOf="@+id/deviceId"
+        android:layout_marginLeft="20dp"
+        android:background="#DDDDAA"
+        android:text="UniqueId:" />
+
+    <TextView
+        android:id="@+id/latitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latitude:"
+        android:background="#AABBFF"
+        android:layout_below="@+id/deviceId"
+        />
+
+    <TextView
+        android:id="@+id/longitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Longitude"
+        android:background="#FFAABB"
+        android:layout_below="@+id/deviceId"
+        android:layout_marginLeft="20dp"
+        android:layout_toEndOf="@+id/latitude" />
+
+    <TextView
+            android:id="@+id/problemType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Problem Type:"
+            android:background="#FFAABB"
+            android:layout_below="@+id/latitude"
+            android:layout_alignLeft="@+id/latitude" />
+
+    <TextView
+            android:id="@+id/problemSeverity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Problem Severity:"
+            android:background="#CCDDEE"
+            android:layout_below="@id/latitude"
+            android:layout_marginLeft="20dp"
+            android:layout_toEndOf="@+id/problemType" />
+
+
+<!--
+    <TextView
+            android:id="@+id/mobileId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+        android:text="Unique ID(Mobile):"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/date"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+            android:id="@+id/deviceId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+        android:text="Device ID: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/uniqueId"
+        android:layout_alignParentStart="true" />
+-->
+
+
+</RelativeLayout>
+<!--
+</android.support.v4.widget.NestedScrollView>
+-->
+
+

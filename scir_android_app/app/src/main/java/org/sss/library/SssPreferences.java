@@ -40,8 +40,11 @@ public class SssPreferences {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         mStoreFullPicture = mPreferences.getBoolean(fullPicture, false);
         mImageRatio = mPreferences.getFloat(imageRatio, 0.2f);
-        mImageHeight = mPreferences.getInt(imageHeight, 75);
-        mImageWidth = mPreferences.getInt(imageWidth, 100);
+        mImageHeight = mPreferences.getInt(imageHeight, 300);
+        mImageWidth = mPreferences.getInt(imageWidth, 400);
+//        (< 1/4 of VGA)
+//        final int PHOTO_WIDTH = 400 ;
+//        final int PHOTO_HEIGHT = 300 ;
     }
 
     public void savePreferences() {
@@ -65,8 +68,6 @@ public class SssPreferences {
         return mImageHeight;
     }
 
-    public int getImageWidth() {
-        return mImageWidth;
-    }
+    public int getImageWidth() { return mImageWidth;}
 
 }

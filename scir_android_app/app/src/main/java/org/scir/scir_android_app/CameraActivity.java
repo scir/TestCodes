@@ -1,5 +1,6 @@
 package org.scir.scir_android_app;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -27,7 +28,6 @@ import org.sss.library.SssImageLibrary;
 import org.sss.library.SssPreferences;
 import org.sss.library.handler.RequestHandlerThread;
 import org.sss.library.scir.ScirInfraFeedbackPoint;
-import org.sss.library.scir.SubmitReport;
 
 
 /**
@@ -58,7 +58,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
     ScirInfraFeedbackPoint mScirDataInfraFeedbackPoint;
     RequestHandlerThread mRequestHandlerThread ;
-    SubmitReport mSubmitReport ;
 
     private SssPreferences sssPreferences ;
 
@@ -84,28 +83,21 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
             try {
                 if (mCameraData != null) {
-                    mSubmitReport.collateReport(mCameraData, mCameraDataCompressed, tm);
+                    mScirDataInfraFeedbackPoint.collateReport(mCameraData, mCameraDataCompressed, tm);
+
                     // New Way : Simply submit the request to backend.
                     Message msgFeedbackPoint = Message.obtain(RequestHandlerThread.getRequestHandlerThread().getSubmitHandler());
                     msgFeedbackPoint.obj = mScirDataInfraFeedbackPoint ;
                     msgFeedbackPoint.what = RequestHandlerThread.MSG_SCIR_FEEDBACK_POINT;
                     msgFeedbackPoint.setTarget(RequestHandlerThread.getScirRequestProcessingHandler());
                     msgFeedbackPoint.sendToTarget();
-                    /*
-                    {
-                        // Old way : Without message queue, send request to backend
-                        new SubmitDataToBackEndTask().execute(mScirDataInfraFeedbackPoint);
-                        String dataSubmitted = mSubmitReport.getDataSubmitted();
-                        Toast.makeText(CameraActivity.this, dataSubmitted, Toast.LENGTH_LONG).show();
-                    }
-                    */
 
                 } else {
                     Toast.makeText(CameraActivity.this, "Picture has not been captured!!", Toast.LENGTH_LONG).show();
                     setResult(RESULT_CANCELED);
                 }
             } catch(Exception e) {
-                Log.e("CameraActivity", "Error while reporting problem to backend\n" + e.getMessage());
+                Log.e("CameraActivity", "Error while capturing Feedback Point details\n" + e.getMessage());
                 setResult(RESULT_CANCELED);
             }
 
@@ -133,7 +125,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         RadioGroup mScirCtlRadioGroupProblemType ;
 
         mScirDataInfraFeedbackPoint = new ScirInfraFeedbackPoint();
-        mSubmitReport = new SubmitReport(mScirDataInfraFeedbackPoint);
 
         mScirCtlRadioGroupProblemType = (RadioGroup) findViewById(R.id.scirCtrlRadioGroupProblemType);
         mScirCtlProblemSeverityRating = (RatingBar) findViewById(R.id.scirCtrlRatingBar);
@@ -148,6 +139,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
     }
 
+    static private Context myContext = null ;
+    static public Context myContext() {
+        return myContext;
+    }
+
     /******************************************************************
      * Main Activity
      *
@@ -158,6 +154,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        myContext = this.getApplicationContext() ;
 
         sssPreferences = SssPreferences.getSssPreferences() ;
 
@@ -231,13 +229,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-//        (< 1/4 of VGA)
-        final int PHOTO_WIDTH = 400 ;
-        final int PHOTO_HEIGHT = 300 ;
         mCameraData = data ;
 
         if( ! sssPreferences.isStoreFullPicture()) {
-            mCameraDataCompressed = SssImageLibrary.resizeImage(data, PHOTO_WIDTH, PHOTO_HEIGHT);
+            mCameraDataCompressed = SssImageLibrary.resizeImage(data,
+                    sssPreferences.getImageWidth(), sssPreferences.getImageHeight());
         }
         setupImageDisplay();
     }
@@ -291,28 +287,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
 
-    class SubmitDataToBackEndTask extends AsyncTask<ScirInfraFeedbackPoint, Void, Void> {
-        private Exception exception;
-        ScirInfraFeedbackPoint mFeedbackPoint ;
-        private boolean statusSuccess = false ;
 
-        protected Void doInBackground(ScirInfraFeedbackPoint... feedbackPoint) {
-            try {
-                this.mFeedbackPoint = feedbackPoint[0] ;
-                statusSuccess = mSubmitReport.reportInfraProblemToBackEnd(CameraActivity.this);
-                if(! statusSuccess) {
-                    Toast.makeText(getApplicationContext(), "Background processing failed!!", Toast.LENGTH_LONG).show();
-                }
-            } catch (Exception e) {
-                this.exception = e;
-            }
-            return null;
-        }
-
-        protected void onPostExecute(ScirInfraFeedbackPoint feedbackPoint) {
-            // TODO: check this.exception
-            // TODO: do something with the feed
-        }
-    }
 
 }

@@ -57,10 +57,6 @@ public class RequestHandlerThread {
         return getRequestHandlerThread().mScirRequestProcessingHandler;
     }
 
-    public boolean postMessage(Message msg) {
-        return mHandler.sendMessage(msg);
-    }
-
     public Handler getSubmitHandler() {
         return mHandler ;
     }

@@ -1,6 +1,12 @@
 package org.sss.library.scir;
 
+import android.database.sqlite.SQLiteOpenHelper;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+
+import org.scir.scir_android_app.MainActivity;
 import org.scir.scir_android_app.R;
+import org.sss.library.db.ScirSqliteHelper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -144,30 +150,79 @@ public class ScirInfraFeedbackPoint {
         }
     }
 
+    public boolean collateReport(byte[] mCameraData, byte[] mCameraDataCompressed, TelephonyManager tm) throws Exception {
+        // TODO : This is collation of all report contents
+        Double lat, lon ;
+        long dateTime ;
+        String mobileNumber;
+        String deviceId;
+
+        mobileNumber = tm.getLine1Number();
+        String simNumber = tm.getSimSerialNumber();
+        String subNumber = tm.getSubscriberId();
+
+        String uniqueId ;
+        if ((mobileNumber != null) && ("".equals(mobileNumber)) == false) {
+            uniqueId = "M" + mobileNumber;
+        } else if( (simNumber != null) && ("".equals(simNumber) == false)) {
+            uniqueId = "S" + simNumber ;
+        } else if ((subNumber != null) && ("".equals(subNumber)) == false) {
+            uniqueId = "B" + subNumber ;
+        } else {
+            uniqueId = "UNAVAILABLE" ;
+        }
+
+        deviceId = tm.getDeviceId();
+        if (deviceId == null) deviceId = "NA";
+
+        if( MainActivity.mScirCurrentLocation == null ) {
+            // TODO: Need to handle Errors here !!
+            throw new Exception("Location not available!");
+        } else {
+            lat = MainActivity.mScirCurrentLocation.getLatitude();
+            lon = MainActivity.mScirCurrentLocation.getLongitude();
+            dateTime = MainActivity.mScirCurrentLocation.getTime();
+        }
+        setScirInfraFeedback(
+                lat, lon, dateTime,
+                mCameraData, mCameraDataCompressed,
+                getScirDataProblemType(), getScirDataProblemSeverityLevel(),
+                uniqueId, deviceId,
+                "<<Description>>", "");
+        return true;
+    }
+
+    public String getDataSubmitted() {
+        String dataSubmitted =
+                "Data Submitted to backend:" +
+                        "\nLat:" + getScirDataLat()  +
+                        "\nProblem: " + getScirDataProblemType().toString() +
+                        "\nSeverity: " + getScirDataProblemSeverityLevel().toString() +
+                        "\nMobile :" + getScirDataMobileNumber() +
+                        "\nLong:" + getScirDataLong()  +
+                        "\nDateTime:" + getScirDataDateTime() +
+                        "\nURL:" + getUrlServer() + "\n" +
+                        "";
+        Log.i("FeedbackPoint", dataSubmitted + this.toString());
+        return dataSubmitted ;
+    }
+
+    public boolean storeIntoDatabase(ScirSqliteHelper dbHandler) {
+        return dbHandler.insertMessage(
+                getScirDataDeviceId(),
+                getScirDataMobileNumber(),
+                getScirDataDateTimeFEServerForamt(),
+                (float) getScirDataLat(),
+                (float) getScirDataLong(),
+                getmScirDataCameraImage().length,
+                getScirDataProblemType().toString(),
+                getScirDataProblemSeverityLevel().toString()
+        );
+    }
+
     public void setUrlServer(String urlServer) { this.mUrlServer = urlServer;}
     public String getUrlServer() { return this.mUrlServer;}
 
-    /*
-    public void setScirDataLat(double mScirDataLat) {
-        this.mScirDataLat = mScirDataLat;
-    }
-    public void setScirDataLong(double mScirDataLong) {
-        this.mScirDataLong = mScirDataLong;
-    }
-    public void setScirDataDateTime(long mScirDataDateTime) {
-        this.mScirDataDateTime = mScirDataDateTime;
-    }
-    public void setScirDataProblemSeverityLevel(SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel) {
-        this.mScirDataProblemSeverityLevel = mScirDataProblemSeverityLevel;
-    }
-    public void setScirDataProblemType(SCIR_PROBLEM_TYPE mScirDataProblemType) {
-        this.mScirDataProblemType = mScirDataProblemType;
-    }
-    public void setScirDataMobileNumber(String mScirDataMobileNumber) {
-        this.mScirDataMobileNumber = mScirDataMobileNumber;
-    }
-    public void setScirDataDeviceId(String mScirDataDeviceId) {
-        this.mScirDataDeviceId = mScirDataDeviceId;
-    }
-    */
+
+
 }
