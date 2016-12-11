@@ -6,24 +6,24 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_DEVICE_ID;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_ID;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_IMAGE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_IMAGE_SIZE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_LAT;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_LONG;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_PROBLEM_TYPE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SEVERITY;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_UNIQUE_ID;
+import static org.sss.library.db.ScirSqliteHelper.DATABASE_VERSION;
+import static org.sss.library.db.ScirSqliteHelper.TABLE_USERS;
+
 /**
  * Created by khelender on 09-12-2016.
  */
 
 public class ScirFeedbackPointSqliteAdaptor {
-
-    private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "scirMsgs.db";
-    public static final String TABLE_USERS = "msgs";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_DATE = "date";
-    public static final String COLUMN_PROBLEM_TYPE = "problem_type";
-    public static final String COLUMN_SEVERITY = "severity";
-    public static final String COLUMN_DEVICE_ID = "device_id";
-    public static final String COLUMN_UNIQUE_ID = "unique_id";
-    public static final String COLUMN_IMAGE_SIZE = "image_size";
-    public static final String COLUMN_LAT = "latitude";
-    public static final String COLUMN_LONG = "longitude";
 
     private ScirSqliteHelper mDbHelper;
     private SQLiteDatabase mDb;
@@ -44,7 +44,7 @@ public class ScirFeedbackPointSqliteAdaptor {
                 mDb.query(TABLE_USERS,
                         new String [] {COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_ID, COLUMN_LAT,
                                 COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
-                                COLUMN_IMAGE_SIZE},
+                                COLUMN_IMAGE_SIZE, COLUMN_IMAGE},
                         null, null, null, null, null);
         if( mCursor != null ) {
             mCursor.moveToFirst();
@@ -59,13 +59,14 @@ public class ScirFeedbackPointSqliteAdaptor {
             mCursor = mDb.query(TABLE_USERS,
                     new String [] {COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_ID, COLUMN_LAT,
                             COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
-                            COLUMN_IMAGE_SIZE},
+                            COLUMN_IMAGE_SIZE, COLUMN_IMAGE},
                     null, null, null, null, null);
         }
         else {
             mCursor = mDb.query(true, TABLE_USERS,
                     new String [] {COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_ID, COLUMN_LAT,
-                            COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID, COLUMN_IMAGE_SIZE},
+                            COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
+                            COLUMN_IMAGE_SIZE, COLUMN_IMAGE},
                     COLUMN_DATE + " like '%" + inputText + "%'", null,
                     null, null, null, null);
         }

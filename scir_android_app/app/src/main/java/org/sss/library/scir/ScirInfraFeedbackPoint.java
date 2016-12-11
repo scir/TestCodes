@@ -32,8 +32,9 @@ public class ScirInfraFeedbackPoint {
         None,
         Electricity,
         Road,
-        Sewage,
+        Sanitation,
         Water,
+        Sewage,
         //        Sanitation,
         Other
     }
@@ -216,7 +217,8 @@ public class ScirInfraFeedbackPoint {
                 (float) getScirDataLong(),
                 getmScirDataCameraImage().length,
                 getScirDataProblemType().toString(),
-                getScirDataProblemSeverityLevel().toString()
+                getScirDataProblemSeverityLevel().toString(),
+                mScirDataCameraImage
         );
     }
 

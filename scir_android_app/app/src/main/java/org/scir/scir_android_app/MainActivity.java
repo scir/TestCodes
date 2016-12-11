@@ -203,6 +203,9 @@ public class MainActivity extends Activity {
                 mCameraBitmap = null;
                 mViewReportedProblemsButton.setEnabled(false);
             }
+        } else if( requestCode == SHOW_FEEDBACKS ) {
+                // Redo settings of associated handler if required (not working after first run)
+//            mViewReportedProblemsButton.setOnClickListener();
         }
     }
 

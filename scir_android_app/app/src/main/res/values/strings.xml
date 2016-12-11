@@ -26,12 +26,8 @@
 
 
     <string name="app_name_feedback">ListView CusrsorAdapter</string>
-     <string name="some_text">
-         Some type of problems !
-     </string>
-     <string name="some_hint">
-      Type here to filter&#8230;
-     </string>
+     <string name="some_text"> Search in submitted feedback points...</string>
+     <string name="some_hint">Type here to filter&#8230;</string>
 
     <!-- Strings related to Settings -->
 
