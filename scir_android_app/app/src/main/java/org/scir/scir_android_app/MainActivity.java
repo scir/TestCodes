@@ -29,23 +29,30 @@ import org.sss.library.location.SingleShotLocationProvider;
 
 public class MainActivity extends Activity {
 
-    private static final int TAKE_PICTURE_REQUEST_B = 100;
-    private static final int SHOW_FEEDBACKS = 101;
+    private static final int START_INTENT_CAMERA = 100;
+    private static final int START_INTENT_FEEDBACK_DATA = 101;
+    private static final int START_INTENT_PREFERENCES = 102 ;
+    private static final int START_INTENT_LOCATION_ACTIVITY = 103 ;
 
     private ImageView mCameraImageView;
     private Bitmap mCameraBitmap;
+    private Button mCaptureInfraProblemButton;
     private Button mViewReportedProblemsButton;
     private Button mLocationServicesButton ;
+    private Button mPreferencesButton;
 
     private TextView mTextViewGeoLocationStatus;
 
     private Intent mIntentReportProblems = null ;
     private Intent mIntentLocationCheck = null ;
+    private Intent mIntentFeedbackData = null ;
+    private Intent mIntentPreferences = null ;
 
     ImageView imgLogo ;
     ImageView imgSmartCityPhoto ;
 
     private SingleShotLocationProvider.LocationCallback mScirLocationCallBack;
+
     private Runnable mRegularLocationUpdater = null ;
     private android.os.Handler mLocationHandler = null ;
     public static Location mScirCurrentLocation ;
@@ -53,12 +60,6 @@ public class MainActivity extends Activity {
     private SssPreferences sssPreferences ;
 
 
-    private OnClickListener mCaptureInfraProblemButtonClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            startInfraProblemCapture();
-        }
-    };
 
     static enum SCIR_LOCATION_SERVICE {
         SCIR_LOCATION_SERVICE_INVALID,
@@ -113,18 +114,71 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void startInfraProblemCapture() {
+        if (null == mIntentReportProblems) {
+            mIntentReportProblems = new Intent(MainActivity.this, CameraActivity.class);
+        }
+        if( mIntentReportProblems  != null ) {
+            startActivityForResult(mIntentReportProblems, START_INTENT_CAMERA);
+        } else {
+            Toast.makeText(getApplicationContext(),"Can't launch Feedback Activity", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void startFeedbackListActivity () {
+        if (null == mIntentFeedbackData) {
+            mIntentFeedbackData = new Intent(MainActivity.this, ScirFeedbackListActivity.class);
+        }
+        if( mIntentFeedbackData  != null ) {
+            startActivityForResult(mIntentFeedbackData, START_INTENT_FEEDBACK_DATA);
+        } else {
+            Toast.makeText(getApplicationContext(),"Can't launch Feedback Activity", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     private void startLocationActivity() {
         if (mIntentLocationCheck == null ) {
             mIntentLocationCheck = new Intent(MainActivity.this, CheckLocationActivity.class);
         }
         if( mIntentLocationCheck != null ) {
-            startActivityForResult(mIntentLocationCheck, TAKE_PICTURE_REQUEST_B);
+            startActivityForResult(mIntentLocationCheck, START_INTENT_LOCATION_ACTIVITY);
         } else {
-            // TODO : Show error alert
+            Toast.makeText(getApplicationContext(),"Can't launch LOCATION Activity", Toast.LENGTH_LONG).show();
         }
     }
 
+    private void startPreferencesActivity() {
+        if (null == mIntentPreferences) {
+            mIntentPreferences = new Intent(MainActivity.this, SettingsActivity.class);
+        }
+        if( mIntentPreferences!= null ) {
+            startActivityForResult(mIntentPreferences, START_INTENT_PREFERENCES);
+        } else {
+            Toast.makeText(getApplicationContext(),"Can't launch Preferences Activity", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+
+    private OnClickListener mCaptureInfraProblemButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startInfraProblemCapture();
+        }
+    };
+    private OnClickListener mViewReportedProblemsButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startFeedbackListActivity();
+        }
+    };
+    private OnClickListener mPreferencesButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startPreferencesActivity();
+        }
+    };
     private OnClickListener mLocationCheckButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -143,6 +197,11 @@ public class MainActivity extends Activity {
         /* Prepare Status text view */
         mTextViewGeoLocationStatus = (TextView) findViewById(R.id.textViewGeoLocationStatus);
         mTextViewGeoLocationStatus.setTextColor(Color.rgb(255,0,0));
+        /* Show Startup Images for Main Activity */
+        imgLogo = (ImageView) findViewById(R.id.imageView);
+        imgLogo.setImageResource(R.drawable.scir_image);
+        imgSmartCityPhoto = (ImageView) findViewById(R.id.imageView2);
+        imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
 
         setupLocationServices();
 
@@ -150,42 +209,31 @@ public class MainActivity extends Activity {
         mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
 
         /* Set buttons Views */
-        findViewById(R.id.capture_infra_problem_button).setOnClickListener(mCaptureInfraProblemButtonClickListener);
-
-//        mLocationServicesButton = (Button) findViewById(R.id.check_problems_reported_button);
-        mLocationServicesButton = (Button) findViewById(R.id.check_location_services_button);
-        mLocationServicesButton.setOnClickListener(mLocationCheckButtonClickListener);
-        mLocationServicesButton.setEnabled(true);
+        mCaptureInfraProblemButton = (Button)findViewById(R.id.capture_infra_problem_button);
+        mCaptureInfraProblemButton.setOnClickListener(mCaptureInfraProblemButtonClickListener);
 
         mViewReportedProblemsButton = (Button) findViewById(R.id.check_problems_reported_button);
-        mViewReportedProblemsButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startFeedbackListActivity();
-            }
-        });
+        mViewReportedProblemsButton.setOnClickListener(mViewReportedProblemsButtonClickListener);
+        mViewReportedProblemsButton.setEnabled(true);
 
-        /* Show Startup Images for Main Activity */
-        imgLogo = (ImageView) findViewById(R.id.imageView);
-        imgLogo.setImageResource(R.drawable.scir_image);
-        imgSmartCityPhoto = (ImageView) findViewById(R.id.imageView2);
-        imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
+        mPreferencesButton = (Button) findViewById(R.id.check_location_services_button);
+        mPreferencesButton.setOnClickListener(mPreferencesButtonClickListener);
+        mPreferencesButton.setEnabled(true);
+
+        // TODO : Enable if required
+//        mLocationServicesButton = (Button) findViewById(R.id.check_location_services_button);
+//        mLocationServicesButton.setOnClickListener(mLocationCheckButtonClickListener);
+//        mLocationServicesButton.setEnabled(true);
 
         // For setup sqlite database
         ScirSqliteHelper.setupSqliteDatabase(getApplicationContext());
-    }
-
-    private void startFeedbackListActivity () {
-        startActivityForResult(
-                new Intent(MainActivity.this, ScirFeedbackListActivity.class),
-                SHOW_FEEDBACKS);
     }
 
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == TAKE_PICTURE_REQUEST_B) {
+        if (requestCode == START_INTENT_CAMERA) {
             if (resultCode == RESULT_OK) {
                 // Recycle the previous bitmap.
                 if (mCameraBitmap != null) {
@@ -197,21 +245,13 @@ public class MainActivity extends Activity {
                 if (cameraData != null) {
                     mCameraBitmap = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);
                     mCameraImageView.setImageBitmap(mCameraBitmap);
-                    mViewReportedProblemsButton.setEnabled(true);
                 }
             } else {
                 mCameraBitmap = null;
-                mViewReportedProblemsButton.setEnabled(false);
             }
-        } else if( requestCode == SHOW_FEEDBACKS ) {
-                // Redo settings of associated handler if required (not working after first run)
-//            mViewReportedProblemsButton.setOnClickListener();
+        } else if( requestCode == START_INTENT_FEEDBACK_DATA) {
         }
     }
 
-    private void startInfraProblemCapture() {
-        // Start intent (view window) that provides interface to capture infra problem
-        startActivityForResult(new Intent(MainActivity.this, CameraActivity.class), TAKE_PICTURE_REQUEST_B);
-    }
 
 }

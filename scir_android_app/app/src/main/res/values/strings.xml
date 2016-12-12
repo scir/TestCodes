@@ -1,5 +1,7 @@
-<resources>
+﻿<resources>
     <string name="app_name">Report City Infra Problems</string>
+
+    <string name="take_picture">Take picture</string>
 
     <string name="action_settings">Settings</string>
     <string name="str_btn_report_infra_problems">Report Problem</string>
@@ -26,8 +28,8 @@
 
 
     <string name="app_name_feedback">ListView CusrsorAdapter</string>
-     <string name="some_text"> Search in submitted feedback points...</string>
-     <string name="some_hint">Type here to filter&#8230;</string>
+    <string name="some_text"> Search in submitted feedback points...</string>
+    <string name="some_hint">Type here to filter&#8230;</string>
 
     <!-- Strings related to Settings -->
 
