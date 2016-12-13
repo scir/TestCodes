@@ -4,7 +4,9 @@ package org.scir.scir_android_app;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.hardware.Camera;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -18,13 +20,11 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ListView;
+
+import org.sss.library.SssPreferences;
 
 import java.util.List;
 
@@ -40,6 +40,7 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -122,10 +123,29 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         .getString(preference.getKey(), ""));
     }
 
+    SCIR_Settings_OnSharedPreferenceChangeListener m_scir_settings_onSharedPreferenceChangeListener = null ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+
+//        m_scir_settings_onSharedPreferenceChangeListener = new SCIR_Settings_OnSharedPreferenceChangeListener() ;
+//        PreferenceManager.getDefaultSharedPreferences(this).
+//                registerOnSharedPreferenceChangeListener(m_scir_settings_onSharedPreferenceChangeListener);
+    }
+
+    @Override
+    protected void onPause() {
+        // Unregister
+//        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(m_scir_settings_onSharedPreferenceChangeListener);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        PreferenceManager.getDefaultSharedPreferences(this).
+//                registerOnSharedPreferenceChangeListener(m_scir_settings_onSharedPreferenceChangeListener);
     }
 
     /**
@@ -186,12 +206,33 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+    public class SCIR_Settings_OnSharedPreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+        /**
+         * Called when a shared preference is changed, added, or removed. This
+         * may be called even if a preference is set to its existing value.
+         * <p>
+         * <p>This callback will be run on your main thread.
+         *
+         * @param sharedPreferences The {@link SharedPreferences} that received
+         *                          the change.
+         * @param key               The key of the preference that was changed, added, or
+         */
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            GeneralPreferenceFragment.updateCameraParametersInSP(key);
+        }
+    }
+
+
+
     /**
      * This fragment shows general preferences only. It is used when the
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -203,6 +244,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+            bindPreferenceSummaryToValue(findPreference("user_image_width_size"));
+            bindPreferenceSummaryToValue(findPreference("user_image_height_size"));
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
@@ -217,6 +260,57 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 //            return super.onCreateView(inflater, container, savedInstanceState);
 //        }
 
+        public static void updateCameraSizeParams(SharedPreferences sharedPreferences) {
+            SssPreferences sssPreferences = SssPreferences.getSssPreferences();
+            Camera camera = Camera.open();
+            Camera.Parameters params = camera.getParameters();
+            List<Camera.Size> sizes = params.getSupportedPictureSizes();
+
+            int targetWidth = Integer.valueOf(sharedPreferences.getString("user_image_width_size","800"));
+
+            float variance[] = new float [sizes.size()], minVariance = 1.0f ;
+            int minVarianceIndex = 0;
+
+            for(int i = 0 ; i < sizes.size(); i++ ) {
+                variance[i] = ((float)(sizes.get(i).width - targetWidth)) / (targetWidth);
+                if( variance[i] < 0 ) {
+                    variance[i] = (-variance[i]);
+                }
+                if( variance[i] < minVariance ) {
+                    minVariance = variance[i] ;
+                    minVarianceIndex = i;
+                }
+            }
+            sssPreferences.setImageHeight(sizes.get(minVarianceIndex).height);
+            sssPreferences.setImageWidth(sizes.get(minVarianceIndex).width);
+            Log.i("SettingActivity", "Camera sizes set for SP: " + sizes.get(minVarianceIndex).width + "x" + sizes.get(minVarianceIndex).height +
+                    " for variance " + minVariance );
+        }
+
+        public static void updateCameraParametersInSP(String key) {
+            SssPreferences sssPreferences = SssPreferences.getSssPreferences();
+            if(mContextSettingActivity == null) {
+                Log.e("SCIR_SettingActivity", "Context not available during static function execution!!");
+                return ;
+            }
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContextSettingActivity);
+
+            if(key.equals("scir_cb_SaveFullImage")) {
+                String flagValue = sharedPreferences.getString("scir_cb_SaveFullImage", "true");
+                boolean bSaveFullImage = Boolean.parseBoolean(flagValue);
+                sssPreferences.setFlagStoreFullPicture(bSaveFullImage);
+            } else if (key.equals("user_image_width_size")) {
+                // Case to update all size parameters
+                updateCameraSizeParams(sharedPreferences);
+            }
+        }
+
+        public static void updateAllCameraParams() {
+            updateCameraParametersInSP("user_image_width_size");
+            updateCameraParametersInSP("scir_cb_SaveFullImage");
+        }
+
+
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
@@ -226,6 +320,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
     }
 
     /**

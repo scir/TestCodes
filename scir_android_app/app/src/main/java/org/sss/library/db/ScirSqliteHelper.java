@@ -13,7 +13,7 @@ import android.util.Log;
 
 public class ScirSqliteHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "scirMsgs.db";
     public static final String TABLE_USERS = "msgs";
     public static final String COLUMN_ID = "_id";
@@ -26,6 +26,7 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_LAT = "latitude";
     public static final String COLUMN_LONG = "longitude";
     public static final String COLUMN_IMAGE = "image" ;
+    public static final String COLUMN_IMAGE_DIMENSION = "image_dimension";
 
     SQLiteDatabase dbFeedback ;
 
@@ -60,6 +61,7 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
             + COLUMN_LAT + " Float, "
             + COLUMN_LONG + " Float, "
             + COLUMN_IMAGE_SIZE + " Long, "
+            + COLUMN_IMAGE_DIMENSION + " Text, "
             + COLUMN_IMAGE + " BLOB"
             + ");";
 
@@ -86,6 +88,7 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
                                  long lCOLUMN_IMAGE_SIZE,
                                  String sCOLUMN_PROBLEM_TYPE,
                                  String sCOLUMN_SEVERITY,
+                                 String sCOLUMN_IMAGE_DIMENSION,
                                  byte[] baCOLUMN_IMAGE
                                  ) {
         SQLiteDatabase db = getWritableDatabase();
@@ -99,6 +102,7 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
         contentValues.put(COLUMN_IMAGE_SIZE, lCOLUMN_IMAGE_SIZE);
         contentValues.put(COLUMN_SEVERITY, sCOLUMN_SEVERITY);
         contentValues.put(COLUMN_UNIQUE_ID, sCOLUMN_UNIQUE_ID);
+        contentValues.put(COLUMN_IMAGE_DIMENSION, sCOLUMN_IMAGE_DIMENSION);
         contentValues.put(COLUMN_IMAGE, baCOLUMN_IMAGE);
         db.insert(TABLE_USERS, null, contentValues);
         db.close();
@@ -106,11 +110,7 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
     }
 
     public void insertSomeRecords() {
-        insertMessage("DDDD", "S131345", "2016-12-09", 3.5f, 4.6f, 5500, "Sanity", "High", null);
-        insertMessage("DDDD", "S135415", "2016-12-09", 3.5f, 4.6f, 55300, "Road", "High", null);
-        insertMessage("DDDD", "S123542", "2016-12-11", 3.5f, 4.6f, 55600, "Electricity", "High", null);
-        insertMessage("DDDD", "S135455", "2016-12-12", 3.5f, 4.6f, 15500, "Road", "High", null);
-        insertMessage("DDDD", "S153545", "2016-12-09", 3.5f, 4.6f, 335500, "Sanity", "High", null);
+        insertMessage("DDDD", "S131345", "2016-12-09", 3.5f, 4.6f, 5500, "Sanity", "High", "", null);
     }
 
 

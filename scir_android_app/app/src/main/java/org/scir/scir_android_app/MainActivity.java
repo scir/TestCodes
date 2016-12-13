@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
         SCIR_LOCATION_SERVICE_ONE_SHOT_LOCATION
     };
     SCIR_LOCATION_SERVICE mScirLocationService = SCIR_LOCATION_SERVICE.SCIR_LOCATION_SERVICE_ONE_SHOT_LOCATION;
+
     private void setupLocationServices() {
         try {
             switch( mScirLocationService ) {
@@ -119,41 +120,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void setupCameraServices() {
-        Camera camera = Camera.open();
-        Camera.Parameters params = camera.getParameters();
-        List<Camera.Size> sizes = params.getSupportedPictureSizes();
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        int targetWidth = Integer.valueOf(sharedPreferences.getString("user_image_width_size","1024"));
-
-        float variance[] = new float [sizes.size()], minVariance = 1.0f ;
-        int minVarianceIndex = 0;
-
-        for(int i = 0 ; i < sizes.size(); i++ ) {
-            variance[i] = ((float)(sizes.get(i).width - targetWidth)) / (targetWidth);
-            if( variance[i] < 0 ) {
-                variance[i] = (-variance[i]);
-            }
-            if( variance[i] < minVariance ) {
-                minVariance = variance[i] ;
-                minVarianceIndex = i;
-            }
-        }
-        sssPreferences.setImageHeight(sizes.get(minVarianceIndex).height);
-        sssPreferences.setImageWidth(sizes.get(minVarianceIndex).width);
-        Log.i("MainActivity", "Camera sizes Selected: " + sizes.get(minVarianceIndex).width + "x" + sizes.get(minVarianceIndex).height +
-                " for variance " + minVariance );
-    }
-
     private void startInfraProblemCapture() {
         if (null == mIntentReportProblems) {
-            mIntentReportProblems = new Intent(MainActivity.this, CameraActivity.class);
+//            mIntentReportProblems = new Intent(MainActivity.this, CameraActivity.class);
+            mIntentReportProblems = new Intent(MainActivity.this, Camera2Activity.class);
         }
         if( mIntentReportProblems  != null ) {
             startActivityForResult(mIntentReportProblems, START_INTENT_CAMERA);
         } else {
-            Toast.makeText(getApplicationContext(),"Can't launch Feedback Activity", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"Can't launch Feedback through Camera2 Activity", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -223,8 +198,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sssPreferences = SssPreferences.getSssPreferences();
-        sssPreferences.initializePreferences(getApplicationContext());
+        sssPreferences = SssPreferences.getSssPreferences(getApplicationContext());
 
         /* Prepare Status text view */
         mTextViewGeoLocationStatus = (TextView) findViewById(R.id.textViewGeoLocationStatus);
@@ -236,7 +210,6 @@ public class MainActivity extends Activity {
         imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
 
         setupLocationServices();
-        setupCameraServices();
 
         /* Need to check view contents of final image view from camera activity */
         mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
@@ -260,6 +233,9 @@ public class MainActivity extends Activity {
 
         // For setup sqlite database
         ScirSqliteHelper.setupSqliteDatabase(getApplicationContext());
+
+        // Update initial level of preferences from Default Shared
+        SettingsActivity.GeneralPreferenceFragment.updateAllCameraParams();
     }
 
 

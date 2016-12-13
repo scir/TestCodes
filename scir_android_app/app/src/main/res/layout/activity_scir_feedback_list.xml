@@ -4,15 +4,26 @@
     android:layout_width="fill_parent" android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:padding="10dp"
-        android:text="@string/some_text" android:textSize="20sp" />
 
-    <EditText android:id="@+id/myFilter" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:ems="10"
-        android:hint="@string/some_hint">
-        <requestFocus />
-    </EditText>
+    <!--<TextView android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content" android:padding="10dp"-->
+        <!--android:text="@string/some_text" android:textSize="15sp" />-->
+
+    <!--<EditText android:id="@+id/myFilter" android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content" android:ems="10"-->
+        <!--android:textSize="12sp"-->
+        <!--android:hint="@string/some_hint">-->
+        <!--<requestFocus />-->
+    <!--</EditText>-->
+
+    <Button
+        android:text="Resubmit All Pending Feedbacks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnResubmitAllPendingFeedbacks"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:capitalize="none" />
+
 
     <ListView android:id="@+id/listView1" android:layout_width="fill_parent"
         android:layout_height="fill_parent" />

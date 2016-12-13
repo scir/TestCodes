@@ -50,7 +50,24 @@ public class ScirInfraFeedbackPoint {
     private byte [] mScirDataCameraImage ;
     private byte [] mScirDataCameraCompressedImage ;
     private String mUrlServer ;
+
+    private String mScirImageDimension;
+    private String mStatus ;
     private String mScirDataReportId;
+
+    public String getScirReportDescription() {
+        return mScirReportDescription;
+    }
+
+    public void setScirReportDescription(String scirReportDescription) {
+        this.mScirReportDescription = scirReportDescription;
+    }
+
+    public void appendScirReportDescription(String scirReportDescription) {
+        this.mScirReportDescription += scirReportDescription;
+    }
+
+    private String mScirReportDescription ;
 
     public ScirInfraFeedbackPoint() {
     }
@@ -60,12 +77,14 @@ public class ScirInfraFeedbackPoint {
                               SCIR_PROBLEM_TYPE mScirDataProblemType,
                               SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel,
                               String mScirDataMobileNumber, String mScirDataDeviceId,
+                                  String mScirImageDimension,
                               String mScirDataFeedbackDescription, String mScirDataReportId)
     {
         this.setScirInfraFeedback(
                 mScirDataLat, mScirDataLong, mScirDataDateTime, mScirDataCameraImage, mScirDataCameraCompressedImage,
                 mScirDataProblemType, mScirDataProblemSeverityLevel,
                 mScirDataMobileNumber, mScirDataDeviceId,
+                mScirImageDimension,
                 mScirDataFeedbackDescription, mScirDataReportId);
     }
 
@@ -74,6 +93,7 @@ public class ScirInfraFeedbackPoint {
                                      SCIR_PROBLEM_TYPE mScirDataProblemType,
                                      SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel,
                                      String mScirDataMobileNumber, String mScirDataDeviceId,
+                                     String scirImageDimension,
                                      String mScirDataFeedbackDescription, String mScirDataReportId)
     {
         this.mScirDataLat = mScirDataLat;
@@ -82,6 +102,7 @@ public class ScirInfraFeedbackPoint {
 
         this.mScirDataCameraImage = mScirDataCameraImage ;
         this.mScirDataCameraCompressedImage = mScirDataCameraCompressedImage ;
+        this.mScirImageDimension = scirImageDimension ;
 
         this.mScirDataProblemSeverityLevel = mScirDataProblemSeverityLevel;
         this.mScirDataProblemType = mScirDataProblemType;
@@ -184,11 +205,13 @@ public class ScirInfraFeedbackPoint {
             lon = MainActivity.mScirCurrentLocation.getLongitude();
             dateTime = MainActivity.mScirCurrentLocation.getTime();
         }
+
         setScirInfraFeedback(
                 lat, lon, dateTime,
                 mCameraData, mCameraDataCompressed,
                 getScirDataProblemType(), getScirDataProblemSeverityLevel(),
                 uniqueId, deviceId,
+                mScirImageDimension,
                 "<<Description>>", "");
         return true;
     }
@@ -218,7 +241,8 @@ public class ScirInfraFeedbackPoint {
                 getmScirDataCameraImage().length,
                 getScirDataProblemType().toString(),
                 getScirDataProblemSeverityLevel().toString(),
-                mScirDataCameraImage
+                mScirImageDimension,
+                (mScirDataCameraCompressedImage == null ) ? mScirDataCameraImage : mScirDataCameraCompressedImage
         );
     }
 
@@ -226,5 +250,11 @@ public class ScirInfraFeedbackPoint {
     public String getUrlServer() { return this.mUrlServer;}
 
 
+    public String getScirImageDimension() {
+        return mScirImageDimension;
+    }
 
+    public void setScirImageDimension(String scirImageDimension) {
+        this.mScirImageDimension = scirImageDimension;
+    }
 }

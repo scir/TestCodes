@@ -1,8 +1,6 @@
 package org.scir.scir_android_app;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import java.io.IOException;
@@ -13,14 +11,13 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
+import android.text.Layout;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -87,6 +84,15 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
             try {
                 if (mCameraData != null) {
+                    String reportDim =
+((mCamera != null) ? ("CameraDim:" + mCamera.getParameters().getPictureSize().width + "X"+ mCamera.getParameters().getPictureSize().height) : "NA2" ) +
+((mCameraPreview != null ) ? ("CameraPreview" + mCameraPreview.getLayoutParams().width + "X" + mCameraPreview.getLayoutParams().height ) : "NA3") +
+((mCameraImage != null ) ? ("ImageDim:" + mCameraImage.getLayoutParams().height + "x" + mCameraImage.getLayoutParams().width ) : "NA1" )+
+((mCameraDataCompressed != null) ? ("CameraCompressedImage:" + mCameraDataCompressed.length): "NA4" )+
+                        "CameraImage:" + mCameraData.length +
+                        "";
+                    mScirDataInfraFeedbackPoint.setScirImageDimension(reportDim);
+                    mScirDataInfraFeedbackPoint.appendScirReportDescription(reportDim);
                     mScirDataInfraFeedbackPoint.collateReport(mCameraData, mCameraDataCompressed, tm);
 
                     // New Way : Simply submit the request to backend.
@@ -96,12 +102,15 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
                     msgFeedbackPoint.setTarget(RequestHandlerThread.getScirRequestProcessingHandler());
                     msgFeedbackPoint.sendToTarget();
 
+                    Log.i("SCIR_CameraActivity", "Content submitted on queue!"
+                    + mScirDataInfraFeedbackPoint.getScirReportDescription());
+
                 } else {
                     Toast.makeText(CameraActivity.this, "Picture has not been captured!!", Toast.LENGTH_LONG).show();
                     setResult(RESULT_CANCELED);
                 }
             } catch(Exception e) {
-                Log.e("CameraActivity", "Error while capturing Feedback Point details\n" + e.getMessage());
+                Log.e("SCIR_CameraActivity", "Error while capturing Feedback Point details\n" + e.getMessage());
                 setResult(RESULT_CANCELED);
             }
 
@@ -148,13 +157,25 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         return myContext;
     }
 
+    private void setupCameraDimensions() {
+        if( mCamera != null ) {
+            Camera.Size oldSize = mCamera.getParameters().getPictureSize();
+            mCamera.getParameters().setPictureSize(sssPreferences.getImageWidth(), sssPreferences.getImageHeight());
+            Camera.Size newSize = mCamera.getParameters().getPictureSize();
+        }
+        if( mCameraPreview != null ) {
+            mCameraPreview.getLayoutParams().height = sssPreferences.getImageHeight();
+            mCameraPreview.getLayoutParams().width = sssPreferences.getImageWidth();
+        }
+    }
+
+
     /******************************************************************
      * Main Activity
      *
      * @param savedInstanceState : Saved Instance State
      *****************************************************************
      */
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,19 +183,15 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         myContext = this.getApplicationContext() ;
 
         sssPreferences = SssPreferences.getSssPreferences() ;
-
         setContentView(R.layout.activity_camera);
 
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
         mCameraImage.setVisibility(View.INVISIBLE);
+        mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
 
+        setupCameraDimensions();
         setupScirEnvForGrievanceCapturing();
 
-        mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
-        ViewGroup.LayoutParams layoutParams = mCameraPreview.getLayoutParams();
-        mCameraPreview.getLayoutParams().height = sssPreferences.getImageHeight();
-        mCameraPreview.getLayoutParams().width = sssPreferences.getImageWidth();
-        ViewGroup.LayoutParams newLayoutParams = mCameraPreview.getLayoutParams();
 
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
         surfaceHolder.addCallback(this);
@@ -186,12 +203,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mRequestHandlerThread = RequestHandlerThread.getRequestHandlerThread();
 
         mIsCapturing = true;
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        int userSelectedImageSize = Integer.valueOf(sharedPreferences.getString("user_image_size","2048"));
-//        int userSelectedImageSize = sharedPreferences.getInt("user_image_size",2048);
-        Log.i("CameraActivity", "User selected image size is : " + userSelectedImageSize);
-        Toast.makeText(getApplicationContext(), "User selected image size is " + userSelectedImageSize, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -220,7 +231,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         if (mCamera == null) {
             try {
                 mCamera = Camera.open();
-                mCamera.getParameters().setPictureSize(sssPreferences.getImageWidth(), sssPreferences.getImageHeight());
+                setupCameraDimensions();
                 mCamera.setPreviewDisplay(mCameraPreview.getHolder());
                 if (mIsCapturing) {
                     mCamera.startPreview();
@@ -247,8 +258,26 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCameraData = data ;
 
         if( ! sssPreferences.isStoreFullPicture()) {
+            mScirDataInfraFeedbackPoint.appendScirReportDescription("Orig Size:(" +
+                    camera.getParameters().getPictureSize().width + "x" +
+                    camera.getParameters().getPictureSize().height + ")\n"
+                    );
             mCameraDataCompressed = SssImageLibrary.resizeImage(data,
                     sssPreferences.getImageWidth(), sssPreferences.getImageHeight());
+            mScirDataInfraFeedbackPoint.appendScirReportDescription("New Size:(" +
+                    camera.getParameters().getPictureSize().width + "x" +
+                    camera.getParameters().getPictureSize().height + ")\n");
+            Log.i("SCIR_CameraActivity", mScirDataInfraFeedbackPoint.getScirReportDescription());
+        } else {
+            String strImageDim = "Orig Size:(" +
+                    camera.getParameters().getPictureSize().width + "x" +
+                    camera.getParameters().getPictureSize().height + ")\n";
+            mScirDataInfraFeedbackPoint.appendScirReportDescription(strImageDim);
+            mScirDataInfraFeedbackPoint.setScirImageDimension(strImageDim);
+            if( mCameraDataCompressed != null) {
+                Log.w("SCIR_CameraActivity", "Case of INCORRECT compressed data repeat Possible!");
+                mCameraDataCompressed = null;
+            }
         }
         setupImageDisplay();
     }
@@ -279,6 +308,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     }
 
     private void captureImage() {
+        setupCameraDimensions();
         mCamera.takePicture(null, null, this);
     }
 
@@ -301,7 +331,5 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mCaptureImageButton.setText(R.string.recapture_image); // ToDo : Fix string in strings.xml
         mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
     }
-
-
 
 }

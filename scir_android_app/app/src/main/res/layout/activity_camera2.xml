@@ -1,13 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#999999"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/capturing_image"   />
 
 
-<SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
-android:id="@+id/mainSurfaceView"
-android:layout_height="fill_parent"
-android:layout_width="fill_parent"
-android:onClick="onClickOnSurfaceView" />
+    <!--<SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--android:id="@+id/mainSurfaceView"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_width="fill_parent"-->
+    <!--android:onClick="onClickOnSurfaceView"-->
+    <!--/>-->
 
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:background="#000"
+        tools:context=".Camera2Activity" />
+    <!-- To also try out .Camera2Activity .Camera2BasicFragment-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/capture_infra_problem_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/capture_image" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+
+
+        <RadioGroup
+            android:id="@+id/scirCtrlRadioGroupProblemType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="17dp" >
+
+            <RadioButton
+                android:id="@+id/scirCtrlRadioSelectElectricity"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:checked="false"
+                android:text="Electricity" />
+
+            <RadioButton
+                android:id="@+id/scirCtrlRadioSelectWater"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="Water" />
+
+            <RadioButton
+                android:id="@+id/scirCtrlRadioSelectRoad"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="Road" />
+
+            <RadioButton
+                android:id="@+id/scirCtrlRadioSelectPollution"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="Pollution" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <RatingBar
+        android:id="@+id/scirCtrlRatingBar"
+        android:layout_width="264dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@style/Widget.AppCompat.ImageButton" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/scirCtrlButtonFeedback"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/done"
+            android:layout_weight="0.34" />
+    </LinearLayout>
+
+
+</LinearLayout>
 
 <!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
 <!--xmlns:tools="http://schemas.android.com/tools"-->
@@ -21,3 +124,11 @@ android:onClick="onClickOnSurfaceView" />
 <!--tools:context="org.scir.scir_android_app.Camera2Activity">-->
 
 <!--</RelativeLayout>-->
+
+
+<!--<FrameLayout-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:id="@+id/container"-->
+    <!--&gt;-->
+<!--</FrameLayout>-->

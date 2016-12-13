@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="org.scir.scir_android_app.ScirFeedbackListActivity"
-    tools:showIn="@layout/activity_scir_feedback_list">
+    tools:context="org.scir.scir_android_app.ScirFeedbackListActivity">
+    <!--tools:showIn="@layout/activity_scir_feedback_list"-->
 
--->
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -30,26 +29,47 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Id:"
+        android:background="#EE99CC"
         android:layout_below="@+id/imgViewFeedback"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        />
+    <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
 
 
     <TextView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/id"
+        android:layout_below="@+id/imgViewFeedback"
+        android:layout_toRightOf="@+id/id"
+        android:background="#EE99CC"
         android:text="Date" />
+
+    <TextView
+        android:id="@+id/reportStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Report Status:"
+        android:background="#99FFEE"
+        android:layout_below="@id/id"
+        android:layout_alignLeft="@+id/id" />
+
 
     <TextView
         android:id="@+id/imageSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/id"
-        android:layout_toRightOf="@+id/date"
-        android:layout_marginLeft="20dp"
-        android:background="#AAEEFF"
+        android:layout_below="@+id/reportStatus"
+        android:background="#FFEEAA"
         android:text="Image Size:" />
+
+    <TextView
+        android:id="@+id/imageDimension"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/reportStatus"
+        android:layout_toRightOf="@+id/imageSize"
+        android:background="#FFEEAA"
+        android:text="Image Dimension:" />
 
 
     <TextView
@@ -57,8 +77,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Device ID: "
-        android:layout_alignLeft="@+id/date"
-        android:layout_below="@+id/date"
+        android:layout_alignLeft="@+id/imageSize"
+        android:layout_below="@+id/imageSize"
         android:background="#99CCCC"
         android:layout_alignParentStart="true" />
 
@@ -66,10 +86,9 @@
         android:id="@+id/uniqueId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/deviceId"
+        android:layout_below="@+id/imageSize"
         android:layout_toRightOf="@+id/deviceId"
-        android:layout_marginLeft="20dp"
-        android:background="#DDDDAA"
+        android:background="#99CCCC"
         android:text="UniqueId:" />
 
     <TextView
@@ -77,7 +96,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Latitude:"
-        android:background="#AABBFF"
+        android:background="#FFAABB"
         android:layout_below="@+id/deviceId"
         />
 
@@ -88,7 +107,6 @@
         android:text="Longitude"
         android:background="#FFAABB"
         android:layout_below="@+id/deviceId"
-        android:layout_marginLeft="20dp"
         android:layout_toEndOf="@+id/latitude" />
 
     <TextView
@@ -105,11 +123,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Problem Severity:"
-            android:background="#CCDDEE"
+            android:background="#FFAABB"
             android:layout_below="@id/latitude"
-            android:layout_marginLeft="20dp"
-            android:layout_toEndOf="@+id/problemType" />
+            android:layout_toRightOf="@+id/problemType"/>
 
+    <Button
+        android:text="Resubmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/problemType"
+        android:id="@+id/btnResubmitFeedback"
+        android:elevation="0dp"/>
 
 </RelativeLayout>
 
+</android.support.v4.widget.NestedScrollView>

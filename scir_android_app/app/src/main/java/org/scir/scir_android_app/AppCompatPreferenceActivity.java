@@ -1,5 +1,6 @@
 package org.scir.scir_android_app;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -19,12 +20,14 @@ import android.view.ViewGroup;
 public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     private AppCompatDelegate mDelegate;
+    protected static Context mContextSettingActivity = null ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getDelegate().installViewFactory();
         getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
+        mContextSettingActivity = getApplicationContext() ;
     }
 
     @Override

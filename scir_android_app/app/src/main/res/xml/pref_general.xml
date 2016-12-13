@@ -6,15 +6,26 @@
         android:summary="@string/pref_description_social_recommendations"
         android:title="@string/pref_title_social_recommendations" />
 
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="scir_cb_SaveFullImage"
+        android:summary="@string/scir_summary_saveimage"
+        android:title="@string/scir_title_saveimage" />
 
-    <ListPreference
-        android:defaultValue="250"
-        android:entries="@array/pref_image_size_titles"
-        android:entryValues="@array/pref_image_size_values"
-        android:key="user_image_size"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_image_size" />
+    <!--<CheckBoxPreference-->
+        <!--android:key="scir_cb_SaveFullImage"-->
+        <!--android:title="Save Full Image"-->
+        <!--android:defaultValue="@string/scir_default_checkbox_preference"-->
+        <!--/>-->
+
+    <!--<ListPreference-->
+        <!--android:defaultValue="250"-->
+        <!--android:entries="@array/pref_image_size_titles"-->
+        <!--android:entryValues="@array/pref_image_size_values"-->
+        <!--android:key="user_image_size"-->
+        <!--android:negativeButtonText="@null"-->
+        <!--android:positiveButtonText="@null"-->
+        <!--android:title="@string/pref_title_image_size" />-->
 
     <ListPreference
         android:defaultValue="250"
@@ -27,7 +38,7 @@
 
     <EditTextPreference
         android:inputType="numberDecimal"
-        android:key="image_height_size"
+        android:key="user_image_height_size"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"

@@ -59,9 +59,9 @@ public class ScirRequestProcessingHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         numRequests++ ;
-        Log.d("BackendProcess-Handle","Received another request: Total Request:" + numRequests);
+        Log.d("SCIR_BE_Process-Handle","Received another request: Total Request:" + numRequests);
         ScirInfraFeedbackPoint scirInfraFeedbackPoint = (ScirInfraFeedbackPoint) msg.obj;
-        Log.w("BackendProcess-Handle","Object details :" +
+        Log.w("SCIR_BE_Process-Handle","Object details :" +
                 "Problem Type:" + scirInfraFeedbackPoint.getScirDataProblemType().toString()+
                 "Severity Type:" + scirInfraFeedbackPoint.getScirDataProblemSeverityLevel().toString()+
                 "DateTime:" + scirInfraFeedbackPoint.getScirDataDateTimeFEServerForamt().toString()
@@ -74,12 +74,12 @@ public class ScirRequestProcessingHandler extends Handler {
     private boolean processRequest(ScirInfraFeedbackPoint scirInfraFeedbackPoint) {
         boolean statusSuccess = false;
         try {
-            Log.i("BackendRequestProcess", "Starting Submission process to backend");
+            Log.i("SCIR_BE_RequestProcess", "Starting Submission process to backend");
             statusSuccess = reportInfraProblemToBackEnd(scirInfraFeedbackPoint);
-            Log.i("BackendRequestProcess", "Status : " + (statusSuccess ? "Good" : "Failed"));
-            Log.i("BackendRequestProcess", scirInfraFeedbackPoint.getDataSubmitted());
+            Log.i("SCIR_BE_RequestProcess", "Status : " + (statusSuccess ? "Good" : "Failed"));
+            Log.i("SCIR_BE_RequestProcess", scirInfraFeedbackPoint.getDataSubmitted());
         } catch (Exception e) {
-            Log.w("BackendRequestProcess", "Got exception " + e.getMessage() + e.toString());
+            Log.w("SCIR_BE_RequestProcess", "Got exception " + e.getMessage() + e.toString());
         }
         return statusSuccess;
     }

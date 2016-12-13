@@ -12,7 +12,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-feature android:name="android.hardware.camera2.full" />
 
     <application
@@ -68,6 +67,11 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.scir.scir_android_app.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Camera2Activity"
+            android:screenOrientation="portrait"
+            android:label="Camera2Activity">
         </activity>
     </application>
 
