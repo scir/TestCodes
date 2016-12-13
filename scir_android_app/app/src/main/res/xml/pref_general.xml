@@ -16,6 +16,23 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_title_image_size" />
 
+    <ListPreference
+        android:defaultValue="250"
+        android:entries="@array/pref_image_width_size_titles"
+        android:entryValues="@array/pref_image_width_size_values"
+        android:key="user_image_width_size"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_image_width_size" />
+
+    <EditTextPreference
+        android:inputType="numberDecimal"
+        android:key="image_height_size"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:defaultValue="768"
+        android:title="Image Height" />
 
     <ListPreference
         android:defaultValue="180"

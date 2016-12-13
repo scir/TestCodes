@@ -1,6 +1,8 @@
 package org.scir.scir_android_app;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.hardware.Camera;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -9,6 +11,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,6 +23,8 @@ import android.widget.Toast;
 import org.sss.library.SssPreferences;
 import org.sss.library.db.ScirSqliteHelper;
 import org.sss.library.location.SingleShotLocationProvider;
+
+import java.util.List;
 
 /**
  * TODO: Functionalities to be added / enhanced :
@@ -114,6 +119,33 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void setupCameraServices() {
+        Camera camera = Camera.open();
+        Camera.Parameters params = camera.getParameters();
+        List<Camera.Size> sizes = params.getSupportedPictureSizes();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        int targetWidth = Integer.valueOf(sharedPreferences.getString("user_image_width_size","1024"));
+
+        float variance[] = new float [sizes.size()], minVariance = 1.0f ;
+        int minVarianceIndex = 0;
+
+        for(int i = 0 ; i < sizes.size(); i++ ) {
+            variance[i] = ((float)(sizes.get(i).width - targetWidth)) / (targetWidth);
+            if( variance[i] < 0 ) {
+                variance[i] = (-variance[i]);
+            }
+            if( variance[i] < minVariance ) {
+                minVariance = variance[i] ;
+                minVarianceIndex = i;
+            }
+        }
+        sssPreferences.setImageHeight(sizes.get(minVarianceIndex).height);
+        sssPreferences.setImageWidth(sizes.get(minVarianceIndex).width);
+        Log.i("MainActivity", "Camera sizes Selected: " + sizes.get(minVarianceIndex).width + "x" + sizes.get(minVarianceIndex).height +
+                " for variance " + minVariance );
+    }
+
     private void startInfraProblemCapture() {
         if (null == mIntentReportProblems) {
             mIntentReportProblems = new Intent(MainActivity.this, CameraActivity.class);
@@ -204,6 +236,7 @@ public class MainActivity extends Activity {
         imgSmartCityPhoto.setImageResource(R.drawable.creative_and_smart_city);
 
         setupLocationServices();
+        setupCameraServices();
 
         /* Need to check view contents of final image view from camera activity */
         mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);

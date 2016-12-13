@@ -95,6 +95,26 @@
         <item>2048</item>
     </string-array>
 
+    <string name="pref_title_image_width_size">Image Size</string>
+    <string-array name="pref_image_width_size_titles">
+        <item>100</item>
+        <item>400</item>
+        <item>800</item>
+        <item>1024</item>
+        <item>2048</item>
+        <item>4000</item>
+    </string-array>
+    <string-array name="pref_image_width_size_values">
+        <item>100</item>
+        <item>400</item>
+        <item>800</item>
+        <item>1024</item>
+        <item>2048</item>
+        <item>4000</item>
+    </string-array>
+
+
+
     <string-array name="list_preference_entries">
         <item>Entry 1</item>
         <item>Entry 2</item>

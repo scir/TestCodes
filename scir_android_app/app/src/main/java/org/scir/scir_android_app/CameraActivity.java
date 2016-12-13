@@ -20,7 +20,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
@@ -169,6 +171,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         setupScirEnvForGrievanceCapturing();
 
         mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
+        ViewGroup.LayoutParams layoutParams = mCameraPreview.getLayoutParams();
+        mCameraPreview.getLayoutParams().height = sssPreferences.getImageHeight();
+        mCameraPreview.getLayoutParams().width = sssPreferences.getImageWidth();
+        ViewGroup.LayoutParams newLayoutParams = mCameraPreview.getLayoutParams();
+
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -180,11 +187,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
         mIsCapturing = true;
 
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-//        String userSelectedImageSize = sharedPreferences.getString("user_image_size","2048");
-////        int userSelectedImageSize = sharedPreferences.getInt("user_image_size",2048);
-//        Log.i("CameraActivity", "User selected image size is : " + userSelectedImageSize);
-//        Toast.makeText(getApplicationContext(), "User selected image size is " + userSelectedImageSize, Toast.LENGTH_LONG).show();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        int userSelectedImageSize = Integer.valueOf(sharedPreferences.getString("user_image_size","2048"));
+//        int userSelectedImageSize = sharedPreferences.getInt("user_image_size",2048);
+        Log.i("CameraActivity", "User selected image size is : " + userSelectedImageSize);
+        Toast.makeText(getApplicationContext(), "User selected image size is " + userSelectedImageSize, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -213,6 +220,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         if (mCamera == null) {
             try {
                 mCamera = Camera.open();
+                mCamera.getParameters().setPictureSize(sssPreferences.getImageWidth(), sssPreferences.getImageHeight());
                 mCamera.setPreviewDisplay(mCameraPreview.getHolder());
                 if (mIsCapturing) {
                     mCamera.startPreview();
