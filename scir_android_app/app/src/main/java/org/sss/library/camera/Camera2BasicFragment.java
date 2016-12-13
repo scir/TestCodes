@@ -39,9 +39,15 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RatingBar;
 import android.widget.Toast;
 
+import org.scir.scir_android_app.Camera2Activity;
 import org.scir.scir_android_app.R;
+import org.sss.library.SssPreferences;
+import org.sss.library.handler.RequestHandlerThread;
+import org.sss.library.scir.ScirInfraFeedbackPoint;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,6 +63,8 @@ import java.util.concurrent.TimeUnit;
 
 import android.support.v13.app.FragmentCompat;
 
+import layout.Camera2Basic;
+
 //import FragmentCompat.OnRequestPermissionResultCallback;
 
 /**
@@ -71,7 +79,10 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
+
     private static Context mContextCamera2BasicFragment = null ;
+
+
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -369,8 +380,13 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    public static Camera2BasicFragment newInstance(Context context) {
-        mContextCamera2BasicFragment = context ;
+    private static RequestHandlerThread mRequestHandlerThread = null;
+    private static Camera2Activity mCamera2Activity = null ;
+
+    public static Camera2BasicFragment newInstance(Camera2Activity camera2Activity, RequestHandlerThread requestHandlerThread) {
+        mContextCamera2BasicFragment = camera2Activity.getApplicationContext();
+        mCamera2Activity = camera2Activity;
+        mRequestHandlerThread = requestHandlerThread ;
         return new Camera2BasicFragment();
     }
 
@@ -694,6 +710,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         }
     }
 
+
     /**
      * Run the precapture sequence for capturing a still image. This method should be called when
      * we get a response in {@link #mCaptureCallback} from {@link #lockFocus()}.
@@ -820,6 +837,19 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void run() {
+            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            try {
+                mCamera2Activity.setCameraData(bytes, mImage.getWidth(), mImage.getHeight());
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                mImage.close();
+            }
+        }
+
+        public void oldRun() {
             ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
