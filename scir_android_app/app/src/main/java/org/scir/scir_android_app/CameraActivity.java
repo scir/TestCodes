@@ -1,6 +1,7 @@
 package org.scir.scir_android_app;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -12,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -178,6 +180,11 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
 
         mIsCapturing = true;
 
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+//        String userSelectedImageSize = sharedPreferences.getString("user_image_size","2048");
+////        int userSelectedImageSize = sharedPreferences.getInt("user_image_size",2048);
+//        Log.i("CameraActivity", "User selected image size is : " + userSelectedImageSize);
+//        Toast.makeText(getApplicationContext(), "User selected image size is " + userSelectedImageSize, Toast.LENGTH_LONG).show();
     }
 
     @Override
