@@ -7,14 +7,14 @@
         android:title="@string/pref_title_social_recommendations" />
 
 
-    <!--<ListPreference-->
-        <!--android:defaultValue="250"-->
-        <!--android:entries="@array/pref_image_size_titles"-->
-        <!--android:entryValues="@array/pref_image_size_values"-->
-        <!--android:key="user_image_size"-->
-        <!--android:negativeButtonText="@null"-->
-        <!--android:positiveButtonText="@null"-->
-        <!--android:title="@string/pref_title_image_size" />-->
+    <ListPreference
+        android:defaultValue="250"
+        android:entries="@array/pref_image_size_titles"
+        android:entryValues="@array/pref_image_size_values"
+        android:key="user_image_size"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_image_size" />
 
 
     <ListPreference
