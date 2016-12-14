@@ -11,6 +11,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -33,6 +35,7 @@ import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.graphics.drawable.DrawableWrapper;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -41,6 +44,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.scir.scir_android_app.Camera2Activity;
@@ -65,7 +69,12 @@ import java.util.concurrent.TimeUnit;
 import android.support.v13.app.FragmentCompat;
 
 /**
- * Created by khelender on 13-12-2016.
+ * Taken from web and adapted by khelender on 13-12-2016.
+ *
+ * Code adopted from Camera2 implementation available over web @
+ * http://www.programcreek.com/java-api-examples/index.php?
+ * source_dir=android-Camera2Basic-master/Application/src/main/java/com/example/android/camera2basic/Camera2BasicFragment.java
+ *
  */
 
 public class Camera2BasicFragment extends Fragment implements View.OnClickListener,FragmentCompat.OnRequestPermissionsResultCallback{
@@ -233,7 +242,17 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+//            updateImageOnView(reader); // To Update View....
             mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
+        }
+
+        void updateImageOnView(ImageReader reader) {
+            Image image = reader.acquireNextImage();
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+            byte[] bytes = new byte[buffer.capacity()];
+            buffer.get(bytes);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            mTextureImageView.setImageBitmap(bitmap);
         }
 
     };
@@ -393,10 +412,12 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         return inflater.inflate(R.layout.fragment_camera2_basic, container, false);
     }
 
+    private ImageView mTextureImageView = null ;
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         view.findViewById(R.id.picture).setOnClickListener(this);
         view.findViewById(R.id.info).setOnClickListener(this);
+        mTextureImageView = (ImageView) view.findViewById(R.id.textureImageView);
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
     }
 
@@ -550,7 +571,6 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Opens the camera specified by {@link Camera2BasicFragment#mCameraId}.
      */
     private void openCamera(int width, int height) {
-//        if (getActivity().checkSelfPermission(Manifest.permission.CAMERA)
         if(ActivityCompat.checkSelfPermission(mContextCamera2BasicFragment, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();

@@ -107,6 +107,13 @@
             android:layout_height="wrap_content"
             android:text="@string/done"
             android:layout_weight="0.34" />
+        <Button
+            android:id="@+id/scirCamera2BtnExit"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/exit"
+            android:layout_weight="0.34" />
+
     </LinearLayout>
 
 

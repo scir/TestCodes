@@ -117,6 +117,7 @@ public class ScirRequestProcessingHandler extends Handler {
             multipart.addFormField("latitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLat()));
             multipart.addFormField("longitude", Double.toString(mScirDataInfraFeedbackPoint.getScirDataLong()));
             multipart.addFormField("time", String.valueOf(mScirDataInfraFeedbackPoint.getScirDataDateTimeFEServerForamt()));
+            multipart.addFormField("datetime", Long.toString(mScirDataInfraFeedbackPoint.getScirDataDateTime()));
 
             Log.i("BackendProcess-Submit", "Level C1.1");
 

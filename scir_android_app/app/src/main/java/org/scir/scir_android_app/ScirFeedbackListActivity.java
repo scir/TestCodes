@@ -26,6 +26,7 @@ import org.sss.library.db.ScirSqliteHelper;
 import org.sss.library.exception.SssUnhandledException;
 
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATETIME;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DEVICE_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_IMAGE;
@@ -34,7 +35,11 @@ import static org.sss.library.db.ScirSqliteHelper.COLUMN_IMAGE_SIZE;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_LAT;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_LONG;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_PROBLEM_TYPE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_RESPONSE_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_SEVERITY;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SUBMIT_DATETIME;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SUBMIT_RESPONSE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SUBMIT_STATUS;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_UNIQUE_ID;
 
 public class ScirFeedbackListActivity extends /* AppCompatActivity */ Activity {
@@ -61,38 +66,15 @@ public class ScirFeedbackListActivity extends /* AppCompatActivity */ Activity {
 
     private void displayListView() {
             Cursor cursor = dbAdaptor.fetchAllFeedbacks();
-            String[] columns = new String[]{
-                    COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_LAT,
-                    COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
-                    COLUMN_IMAGE_SIZE, COLUMN_IMAGE_DIMENSION, COLUMN_IMAGE
-            };
 
-
-            // the XML defined views which the data will be bound to
-            int[] to = new int[]{
-                    R.id.id,
-                    R.id.date,
-                    R.id.deviceId,
-                    R.id.latitude,
-
-                    R.id.longitude,
-                    R.id.problemType,
-                    R.id.problemSeverity,
-                    R.id.uniqueId,
-
-                    R.id.imageSize,
-                    R.id.imageDimension,
-                    R.id.image
-            };
 
             // create the adapter using the cursor pointing to the desired data
             //as well as the layout information
             dataAdapter = new ImageCursorAdapter(
                     this, R.layout.content_scir_feedback_list,
                     cursor,
-                    columns,
-                    to
-//                    ,0
+                    ScirSqliteHelper.scirSqlTableFields,
+                    ScirSqliteHelper.scirSqlTableFieldsMappingToXML
                     );
 
             ListView listView = (ListView) findViewById(R.id.listView1);
@@ -160,7 +142,7 @@ public class ScirFeedbackListActivity extends /* AppCompatActivity */ Activity {
             }
             this.c.moveToPosition(pos);
             String colId    = this.c.getString(this.c.getColumnIndex(COLUMN_ID));
-            String colDate  = this.c.getString(this.c.getColumnIndex(COLUMN_DATE));
+            String colReportedDateReadable  = this.c.getString(this.c.getColumnIndex(COLUMN_DATE));
             String colDeviceId = this.c.getString(this.c.getColumnIndex(COLUMN_DEVICE_ID));
             String colUniqueId = this.c.getString(this.c.getColumnIndex(COLUMN_UNIQUE_ID));
             String colProblemType = this.c.getString(this.c.getColumnIndex(COLUMN_PROBLEM_TYPE));
@@ -171,12 +153,18 @@ public class ScirFeedbackListActivity extends /* AppCompatActivity */ Activity {
             float colLongitude = this.c.getFloat(this.c.getColumnIndex(COLUMN_LONG));
             byte [] colImage = this.c.getBlob(this.c.getColumnIndex(COLUMN_IMAGE));
 
+            String colSubmitStatus = this.c.getString(this.c.getColumnIndex(COLUMN_SUBMIT_STATUS));
+            String colSubmitResponse = this.c.getString(this.c.getColumnIndex(COLUMN_SUBMIT_RESPONSE));
+            long colSubmitDatetime = this.c.getLong(this.c.getColumnIndex(COLUMN_SUBMIT_DATETIME));
+            String colResponseId = this.c.getString(this.c.getColumnIndex(COLUMN_RESPONSE_ID));
+            long colReportedDatetime = this.c.getLong(this.c.getColumnIndex(COLUMN_DATETIME));
+
             if (colImage != null) {
                 ImageView iv = (ImageView) v.findViewById(R.id.imgViewFeedback);
                 iv.setImageBitmap(BitmapFactory.decodeByteArray(colImage, 0, colImage.length));
             }
             TextView tId = (TextView) v.findViewById(R.id.id);
-            TextView tDate = (TextView) v.findViewById(R.id.date);
+            TextView tReportedDateReadable = (TextView) v.findViewById(R.id.date);
             TextView tDeviceId = (TextView) v.findViewById(R.id.deviceId);
             TextView tUniqueId = (TextView) v.findViewById(R.id.uniqueId);
             TextView tLat = (TextView) v.findViewById(R.id.latitude);
@@ -186,20 +174,34 @@ public class ScirFeedbackListActivity extends /* AppCompatActivity */ Activity {
             TextView tImageDimension = (TextView) v.findViewById(R.id.imageDimension);
             TextView tImageSize = (TextView) v.findViewById(R.id.imageSize);
 
-            tId.setText( "(Id,Date):(" + colId);
-            tDate.setText(", " + colDate + ")");
+            TextView tSubmitStatus = (TextView) v.findViewById(R.id.submitStatus);
+            TextView tSubmitResponse = (TextView) v.findViewById(R.id.submitResponse);
+            TextView tSubmitDatetime = (TextView) v.findViewById(R.id.submitDatetime);
+            TextView tResponseId = (TextView) v.findViewById(R.id.responseId);
+            TextView tProblemReportDatetime = (TextView) v.findViewById(R.id.problemReportDatetime);
+
+            tId.setText( "Id:" + colId);
+
+            tSubmitStatus.setText("(Submit Status and acceptance datetime" + colSubmitStatus );
+            tSubmitDatetime.setText( ", " + colSubmitDatetime + ")" );
+
+            tImageSize.setText(Long.toString(colImageSize));
+            tImageDimension.setText("#" + colImageDimension + "#" );
 
             tDeviceId.setText("(" + colDeviceId);
             tUniqueId.setText("," + colUniqueId + ")");
 
-            tProblemType.setText("(Issue Type, Severity) = (" + colProblemType);
-            tProblemSeverity.setText(", " + colSeverity + ")" );
-
             tLat.setText("(Lat,Long)=(" + Float.toString(colLatitude));
             tLong.setText(", " + Float.toString(colLongitude) + ")" );
 
-            tImageSize.setText(Long.toString(colImageSize));
-            tImageDimension.setText("#" + colImageDimension + "#" );
+            tProblemType.setText("(Issue Type, Severity) = (" + colProblemType);
+            tProblemSeverity.setText(", " + colSeverity + ")" );
+
+            tResponseId.setText("(Resp Id, desc)=" + colResponseId);
+            tSubmitResponse.setText(", " + colSubmitResponse);
+
+            tProblemReportDatetime.setText("(Rep. datetime/date" + colReportedDatetime);
+            tReportedDateReadable.setText(", " + colReportedDateReadable + ")");
 
             return(v);
         }

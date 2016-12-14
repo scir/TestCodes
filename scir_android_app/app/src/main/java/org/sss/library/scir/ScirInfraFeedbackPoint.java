@@ -242,6 +242,13 @@ public class ScirInfraFeedbackPoint {
                 getScirDataProblemType().toString(),
                 getScirDataProblemSeverityLevel().toString(),
                 mScirImageDimension,
+
+                "RequestReceivedAtMobile",
+                "",
+                -1L,
+                "",
+                getScirDataDateTime(),
+
                 (mScirDataCameraCompressedImage == null ) ? mScirDataCameraImage : mScirDataCameraCompressedImage
         );
     }

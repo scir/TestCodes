@@ -45,6 +45,17 @@
         android:defaultValue="768"
         android:title="Image Height" />
 
+
+    <EditTextPreference
+        android:inputType="numberDecimal"
+        android:key="user_location_updates_frequency"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:defaultValue="12"
+        android:summary="@string/scir_summary_location_updates"
+        android:title="@string/scir_title_location_updates" />
+
     <ListPreference
         android:defaultValue="180"
         android:entries="@array/pref_sync_frequency_titles"

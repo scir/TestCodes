@@ -40,6 +40,9 @@ public class MainActivity extends Activity {
     private static final int START_INTENT_PREFERENCES = 102 ;
     private static final int START_INTENT_LOCATION_ACTIVITY = 103 ;
 
+    public static final int RESULT_EXIT_CALLED = 200 ;
+    public static final int RESULT_RESTART_INTENT_CAMERA = 201 ;
+
     private ImageView mCameraImageView;
     private Bitmap mCameraBitmap;
     private Button mCaptureInfraProblemButton;

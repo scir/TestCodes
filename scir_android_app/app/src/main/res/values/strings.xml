@@ -18,6 +18,7 @@
     <string name="capturing_image">Taking New Picture</string>
     <string name="done">Report Infra Feedback</string>
     <string name="title_activity_check_location">CheckLocationActivity</string>
+    <string name="exit">Exit</string>
 
     <string name="strScirBuildName">2016-12-07_17:00</string>
     <string name="strSmartCityView">Smart City View</string>
@@ -66,6 +67,10 @@
     <string name="scir_default_checkbox_preference">false</string>
     <string name="scir_summary_saveimage">Submit Full Size Image to server</string>
     <string name="scir_title_saveimage">Full Image Size</string>
+
+    <string name="scir_title_location_updates">Location Updates Frequency</string>
+    <string name="scir_summary_location_updates">Specifies period in which a new location is fetched (in Seconds)</string>
+
 
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Data &amp; sync</string>

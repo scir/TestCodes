@@ -9,6 +9,7 @@ import android.util.Log;
 import org.sss.library.exception.SssUnhandledException;
 
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATETIME;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DEVICE_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_IMAGE;
@@ -17,7 +18,11 @@ import static org.sss.library.db.ScirSqliteHelper.COLUMN_IMAGE_SIZE;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_LAT;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_LONG;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_PROBLEM_TYPE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_RESPONSE_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_SEVERITY;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SUBMIT_DATETIME;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SUBMIT_RESPONSE;
+import static org.sss.library.db.ScirSqliteHelper.COLUMN_SUBMIT_STATUS;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_UNIQUE_ID;
 import static org.sss.library.db.ScirSqliteHelper.DATABASE_VERSION;
 import static org.sss.library.db.ScirSqliteHelper.TABLE_USERS;
@@ -43,9 +48,7 @@ public class ScirFeedbackPointSqliteAdaptor {
     public Cursor fetchAllFeedbacks() {
         Cursor mCursor =
                 mDb.query(TABLE_USERS,
-                        new String [] {COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_ID, COLUMN_LAT,
-                                COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
-                                COLUMN_IMAGE_SIZE, COLUMN_IMAGE_DIMENSION, COLUMN_IMAGE},
+                        ScirSqliteHelper.scirSqlTableFields,
                         null, null, null, null, null);
         if( mCursor != null ) {
             mCursor.moveToFirst();
@@ -58,16 +61,12 @@ public class ScirFeedbackPointSqliteAdaptor {
         Cursor mCursor = null;
         if (inputText == null  ||  inputText.length () == 0)  {
             mCursor = mDb.query(TABLE_USERS,
-                    new String [] {COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_ID, COLUMN_LAT,
-                            COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
-                            COLUMN_IMAGE_SIZE, COLUMN_IMAGE_DIMENSION, COLUMN_IMAGE},
+                    ScirSqliteHelper.scirSqlTableFields,
                     null, null, null, null, null);
         }
         else {
             mCursor = mDb.query(true, TABLE_USERS,
-                    new String [] {COLUMN_ID, COLUMN_DATE, COLUMN_DEVICE_ID, COLUMN_ID, COLUMN_LAT,
-                            COLUMN_LONG, COLUMN_PROBLEM_TYPE, COLUMN_SEVERITY, COLUMN_UNIQUE_ID,
-                            COLUMN_IMAGE_SIZE, COLUMN_IMAGE_DIMENSION, COLUMN_IMAGE},
+                    ScirSqliteHelper.scirSqlTableFields,
                     COLUMN_DATE + " like '%" + inputText + "%'", null,
                     null, null, null, null);
         }

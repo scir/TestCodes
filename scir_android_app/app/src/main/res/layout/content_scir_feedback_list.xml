@@ -34,31 +34,29 @@
         />
     <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
 
-
     <TextView
-        android:id="@+id/date"
+        android:id="@+id/submitStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imgViewFeedback"
-        android:layout_toRightOf="@+id/id"
-        android:background="#EE99CC"
-        android:text="Date" />
-
-    <TextView
-        android:id="@+id/reportStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Report Status:"
+        android:text="Report Submit Status:"
         android:background="#99FFEE"
         android:layout_below="@id/id"
-        android:layout_alignLeft="@+id/id" />
+        android:layout_alignLeft="@id/id" />
 
+    <TextView
+        android:id="@+id/submitDatetime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submission acceptance Datetime:"
+        android:background="#99EEEE"
+        android:layout_below="@id/id"
+        android:layout_toRightOf="@id/submitStatus" />
 
     <TextView
         android:id="@+id/imageSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reportStatus"
+        android:layout_below="@id/submitStatus"
         android:background="#FFEEAA"
         android:text="Image Size:" />
 
@@ -66,7 +64,7 @@
         android:id="@+id/imageDimension"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reportStatus"
+        android:layout_below="@id/submitStatus"
         android:layout_toRightOf="@+id/imageSize"
         android:background="#FFEEAA"
         android:text="Image Dimension:" />
@@ -127,11 +125,48 @@
             android:layout_below="@id/latitude"
             android:layout_toRightOf="@+id/problemType"/>
 
-    <Button
+        <TextView
+            android:id="@+id/responseId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Response ID:"
+            android:background="#99EEEE"
+            android:layout_below="@id/problemType"
+            android:layout_alignLeft="@+id/id"  />
+
+        <TextView
+            android:id="@+id/submitResponse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Response:"
+            android:background="#99EEEE"
+            android:layout_below="@id/problemType"
+            android:layout_toRightOf="@id/responseId" />
+
+
+        <TextView
+            android:id="@+id/problemReportDatetime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reported Datetime:"
+            android:background="#99EEEE"
+            android:layout_below="@id/responseId"
+            android:layout_alignLeft="@id/responseId" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/responseId"
+            android:layout_toRightOf="@id/problemReportDatetime"
+            android:background="#EE99CC"
+            android:text="Date" />
+
+        <Button
         android:text="Resubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/problemType"
+        android:layout_below="@id/problemReportDatetime"
         android:id="@+id/btnResubmitFeedback"
         android:elevation="0dp"/>
 

@@ -17,6 +17,9 @@ import org.sss.library.camera.Camera2BasicFragment;
 import org.sss.library.handler.RequestHandlerThread;
 import org.sss.library.scir.ScirInfraFeedbackPoint;
 
+import static org.scir.scir_android_app.MainActivity.RESULT_EXIT_CALLED;
+import static org.scir.scir_android_app.MainActivity.RESULT_RESTART_INTENT_CAMERA;
+
 public class Camera2Activity extends Activity {
 
     private byte[] mCameraData;
@@ -73,8 +76,17 @@ public class Camera2Activity extends Activity {
                     .replace(R.id.container, mCamera2BasicFragment )
                     .commit();
         }
-
+        Button buttonScirCamera2Exit = (Button)findViewById(R.id.scirCamera2BtnExit);
+        buttonScirCamera2Exit.setOnClickListener(mScirExitButtonClickListener);
     }
+
+    private View.OnClickListener mScirExitButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            setResult(RESULT_EXIT_CALLED);
+            finish();
+        }
+    };
 
     private View.OnClickListener mScirFeedbackButtonClickListener = new View.OnClickListener() {
         @Override
@@ -99,17 +111,18 @@ public class Camera2Activity extends Activity {
 
                     Log.i("SCIR_Camera2Activity", "Content submitted on queue!"
                             + mScirDataInfraFeedbackPoint.getScirReportDescription());
-
+                    Toast.makeText(getApplicationContext(), "Feedback submitted!", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(Camera2Activity.this, "Picture has not been captured!!", Toast.LENGTH_LONG).show();
-                    setResult(RESULT_CANCELED);
+                    setResult(RESULT_RESTART_INTENT_CAMERA);
                 }
             } catch(Exception e) {
-                Log.e("SCIR_Camera2Activity", "Error while capturing Feedback Point details\n" + e.getMessage());
-                setResult(RESULT_CANCELED);
+                String errorMessage = "Error while capturing Feedback Point details\n" + e.getMessage();
+                Log.e("SCIR_Camera2Activity", errorMessage);
+                Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+                setResult(RESULT_RESTART_INTENT_CAMERA);
+            } finally {
             }
-
-            finish();
         }
     };
 
