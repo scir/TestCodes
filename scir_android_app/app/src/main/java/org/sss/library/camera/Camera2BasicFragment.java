@@ -8,6 +8,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
@@ -29,6 +30,7 @@ import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -39,33 +41,28 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.RatingBar;
 import android.widget.Toast;
 
 import org.scir.scir_android_app.Camera2Activity;
 import org.scir.scir_android_app.R;
 import org.sss.library.SssPreferences;
 import org.sss.library.handler.RequestHandlerThread;
-import org.sss.library.scir.ScirInfraFeedbackPoint;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import android.support.v13.app.FragmentCompat;
-
-import layout.Camera2Basic;
-
-//import FragmentCompat.OnRequestPermissionResultCallback;
 
 /**
  * Created by khelender on 13-12-2016.
@@ -454,6 +451,35 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         }
     }
 
+    private Size chooseSizeConfiguration(Size [] sizes) {
+        SssPreferences sssPreferences = SssPreferences.getSssPreferences();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        int targetWidth = Integer.valueOf(sharedPreferences.getString("user_image_width_size","800"));
+
+        float variance[] = new float [sizes.length], minVariance = 1.0f ;
+        int minVarianceIndex = 0;
+
+        for(int i = 0 ; i < sizes.length; i++ ) {
+            variance[i] = ((float)(sizes[i].getWidth() - targetWidth) / (targetWidth));
+            if( variance[i] < 0 ) {
+                variance[i] = (-variance[i]);
+            }
+            if( variance[i] < minVariance ) {
+                minVariance = variance[i] ;
+                minVarianceIndex = i;
+            }
+        }
+        sssPreferences.setImageHeight(sizes[minVarianceIndex].getHeight());
+        sssPreferences.setImageWidth(sizes[minVarianceIndex].getWidth());
+
+        Log.i("SCIR_Camera2BasicFrag", "Camera sizes set for SP: " + sizes[minVarianceIndex].getWidth() + "x" + sizes[minVarianceIndex].getHeight() +
+                " for variance " + minVariance );
+
+        return sizes[minVarianceIndex];
+    }
+
+
     /**
      * Sets up member variables related to camera.
      *
@@ -479,11 +505,13 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                 if (map == null) {
                     continue;
                 }
+//                // For still image captures, we use the largest available size.
+                /*
+                 * Refine the Map to only keep required image levels !!!
+                 *
+                 */
+                Size largest = chooseSizeConfiguration(map.getOutputSizes(ImageFormat.JPEG));
 
-                // For still image captures, we use the largest available size.
-                Size largest = Collections.max(
-                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-                        new CompareSizesByArea());
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
                         ImageFormat.JPEG, /*maxImages*/2);
                 mImageReader.setOnImageAvailableListener(
