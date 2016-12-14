@@ -26,6 +26,7 @@ import org.sss.library.location.SingleShotLocationProvider;
 
 import java.util.List;
 
+
 /**
  * TODO: Functionalities to be added / enhanced :
  * 1) Location should be predicted accurately in a speedy manner using Location Services (out of speed and accuracy, ACCURACY has higher priority.
@@ -118,6 +119,13 @@ public class MainActivity extends Activity {
         } catch(Exception e) {
             Toast.makeText(MainActivity.this, "Unable to setup Location Services possibly.....", Toast.LENGTH_LONG).show();
         }
+    }
+
+    void initializeApplicationEnvironment() {
+        // For setup sqlite database
+        ScirSqliteHelper.initScirSqliteHelper(getApplicationContext());
+        // Update initial level of preferences from Default Shared
+        SettingsActivity.GeneralPreferenceFragment.updateAllCameraParams();
     }
 
     private void startInfraProblemCapture() {
@@ -231,11 +239,7 @@ public class MainActivity extends Activity {
 //        mLocationServicesButton.setOnClickListener(mLocationCheckButtonClickListener);
 //        mLocationServicesButton.setEnabled(true);
 
-        // For setup sqlite database
-        ScirSqliteHelper.setupSqliteDatabase(getApplicationContext());
-
-        // Update initial level of preferences from Default Shared
-        SettingsActivity.GeneralPreferenceFragment.updateAllCameraParams();
+        initializeApplicationEnvironment();
     }
 
 

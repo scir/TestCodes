@@ -6,6 +6,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import org.sss.library.exception.SssUnhandledException;
+
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATE;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DEVICE_ID;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_ID;
@@ -28,11 +30,9 @@ public class ScirFeedbackPointSqliteAdaptor {
 
     private ScirSqliteHelper mDbHelper;
     private SQLiteDatabase mDb;
-    private final Context mContext ;
 
-    public ScirFeedbackPointSqliteAdaptor(Context ctx) {
-        this.mContext = ctx;
-        mDbHelper = new ScirSqliteHelper(mContext,"FeedbackDatabase",null, DATABASE_VERSION);
+    public ScirFeedbackPointSqliteAdaptor() throws SssUnhandledException {
+        mDbHelper = ScirSqliteHelper.getScirSqliteHelper();
     }
 
     public ScirSqliteHelper open() throws SQLException {

@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.sss.library.exception.SssUnhandledException;
+
 /**
  * Created by khelender on 09-12-2016.
  */
@@ -28,27 +30,29 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IMAGE = "image" ;
     public static final String COLUMN_IMAGE_DIMENSION = "image_dimension";
 
-    SQLiteDatabase dbFeedback ;
+    private static ScirSqliteHelper mScirSqliteHelper = null ;
+    private SQLiteDatabase dbFeedback ;
 
+    public static ScirSqliteHelper getScirSqliteHelper() throws SssUnhandledException {
+        if( mScirSqliteHelper  == null ) {
+            throw new SssUnhandledException("ScirSqliteHelper has not been initialized");
+        } else {
+            return mScirSqliteHelper;
+        }
+    }
 
-    public ScirSqliteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
-                     int version) {
-        super(context, DATABASE_NAME, factory, DATABASE_VERSION);
+    public static void initScirSqliteHelper(Context context) {
+        mScirSqliteHelper = new ScirSqliteHelper(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    private ScirSqliteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, name, factory, version);
         dbFeedback = getWritableDatabase();
         dbFeedback.close();
     }
 
     public void open() {
         getReadableDatabase();
-    }
-
-    public static void setupSqliteDatabase(Context context) {
-        ScirSqliteHelper dbSqlite = new ScirSqliteHelper(context, "FeedbackDatabase", null,1);
-
-//        dbSqlite.getWritableDatabase();
-//        dbSqlite.insertMessage("DDDD", "S13545", "2016-12-09", 3.5f, 4.6f, 55300, "Sanity", "High");
-//        dbSqlite.insertSomeRecords();
-        dbSqlite.close();
     }
 
     String query = "CREATE TABLE " + TABLE_USERS + "("
@@ -69,8 +73,6 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         Log.w("ScirSqliteHelper", "Creating database");
         db.execSQL(query);
-
-//        insertMessage("DDDD", "S131345", "2016-12-09", 3.5f, 4.6f, 5500, "Sanity", "High");
     }
 
     @Override
@@ -93,7 +95,6 @@ public class ScirSqliteHelper extends SQLiteOpenHelper {
                                  ) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-//        contentValues.put(COLUMN_ID,12345);
         contentValues.put(COLUMN_DATE, sCOLUMN_DATE);
         contentValues.put(COLUMN_DEVICE_ID, sCOLUMN_DEVICE_ID);
         contentValues.put(COLUMN_PROBLEM_TYPE, sCOLUMN_PROBLEM_TYPE);

@@ -10,6 +10,7 @@ import org.scir.scir_android_app.CameraActivity;
 import org.sss.library.MultipartUtility;
 import org.sss.library.SssPreferences;
 import org.sss.library.db.ScirSqliteHelper;
+import org.sss.library.exception.SssUnhandledException;
 import org.sss.library.scir.ScirInfraFeedbackPoint;
 
 import java.io.IOException;
@@ -37,8 +38,13 @@ public class ScirRequestProcessingHandler extends Handler {
      */
     public ScirRequestProcessingHandler(Looper looper) {
         super(looper);
-        mScirSqliteHelper = new ScirSqliteHelper(
-                CameraActivity.myContext(),null,null,1);
+        try {
+            mScirSqliteHelper = ScirSqliteHelper.getScirSqliteHelper();
+        } catch (SssUnhandledException e) {
+            e.printStackTrace();
+        }
+//        mScirSqliteHelper = new ScirSqliteHelper(
+//                CameraActivity.myContext(),null,null,1);
     }
 
     /**

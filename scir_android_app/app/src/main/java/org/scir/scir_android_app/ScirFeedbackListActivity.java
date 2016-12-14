@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 
 import org.sss.library.db.ScirFeedbackPointSqliteAdaptor;
 import org.sss.library.db.ScirSqliteHelper;
+import org.sss.library.exception.SssUnhandledException;
 
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DATE;
 import static org.sss.library.db.ScirSqliteHelper.COLUMN_DEVICE_ID;
@@ -45,9 +47,14 @@ public class ScirFeedbackListActivity extends /* AppCompatActivity */ Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scir_feedback_list);
 
-            dbAdaptor = new ScirFeedbackPointSqliteAdaptor(getApplicationContext());
-        dbAdaptor.open();
-        displayListView();
+        try {
+            dbAdaptor = new ScirFeedbackPointSqliteAdaptor();
+            dbAdaptor.open();
+            displayListView();
+        } catch(SssUnhandledException e) {
+            e.printStackTrace();
+            Log.e("SCIR_FeedbkListActivity", e.getStackTrace().toString());
+        }
 
     }
 

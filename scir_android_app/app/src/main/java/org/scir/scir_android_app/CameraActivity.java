@@ -50,7 +50,16 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     private ImageView mCameraImage;
     private SurfaceView mCameraPreview;
     private Button mCaptureImageButton;
+
     private byte[] mCameraData;
+    private int mImageHeight = -1 , mImageWidth = -1 ;
+
+    private synchronized void setCameraData(byte[] cameraData, int width, int height) {
+        mCameraData = cameraData ;
+        mImageHeight = height ;
+        mImageWidth = width ;
+    }
+
     private byte[] mCameraDataCompressed;
     private boolean mIsCapturing;
 
@@ -85,12 +94,7 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
             try {
                 if (mCameraData != null) {
                     String reportDim =
-((mCamera != null) ? ("CameraDim:" + mCamera.getParameters().getPictureSize().width + "X"+ mCamera.getParameters().getPictureSize().height) : "NA2" ) +
-((mCameraPreview != null ) ? ("CameraPreview" + mCameraPreview.getLayoutParams().width + "X" + mCameraPreview.getLayoutParams().height ) : "NA3") +
-((mCameraImage != null ) ? ("ImageDim:" + mCameraImage.getLayoutParams().height + "x" + mCameraImage.getLayoutParams().width ) : "NA1" )+
-((mCameraDataCompressed != null) ? ("CameraCompressedImage:" + mCameraDataCompressed.length): "NA4" )+
-                        "CameraImage:" + mCameraData.length +
-                        "";
+                        "CameraImage:" + mImageWidth + "x" + mImageHeight + "& length=" + mCameraData.length + "\n";
                     mScirDataInfraFeedbackPoint.setScirImageDimension(reportDim);
                     mScirDataInfraFeedbackPoint.appendScirReportDescription(reportDim);
                     mScirDataInfraFeedbackPoint.collateReport(mCameraData, mCameraDataCompressed, tm);
@@ -152,10 +156,10 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
     }
 
-    static private Context myContext = null ;
-    static public Context myContext() {
-        return myContext;
-    }
+//    static private Context myContext = null ;
+//    static public Context myContext() {
+//        return myContext;
+//    }
 
     private void setupCameraDimensions() {
         if( mCamera != null ) {
@@ -179,8 +183,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        myContext = this.getApplicationContext() ;
 
         sssPreferences = SssPreferences.getSssPreferences() ;
         setContentView(R.layout.activity_camera);
