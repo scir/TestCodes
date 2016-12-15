@@ -22,7 +22,7 @@ import static org.scir.scir_android_app.MainActivity.RESULT_RESTART_INTENT_CAMER
 
 public class Camera2Activity extends Activity {
 
-    private byte[] mCameraData;
+    protected byte[] mCameraData;
     private int mImageHeight = -1 , mImageWidth = -1 ;
 
     public synchronized void setCameraData(byte[] cameraData, int width, int height) {

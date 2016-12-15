@@ -25,13 +25,13 @@
             android:layout_above="@id/texture"
             android:background="#4285f4">
         <Button
-            android:id="@+id/picture"
+            android:id="@+id/buttonCapturePictureAndShow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/picture" />
         <ImageButton
-            android:id="@+id/info"
+            android:id="@+id/buttonCamera2BasicFragment_info"
             android:contentDescription="@string/description_info"
             style="@android:style/Widget.Material.Light.Button.Borderless"
             android:layout_width="wrap_content"

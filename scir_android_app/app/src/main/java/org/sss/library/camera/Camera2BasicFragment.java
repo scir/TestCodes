@@ -37,7 +37,6 @@ import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.graphics.drawable.DrawableWrapper;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -46,6 +45,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -58,13 +58,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -251,19 +249,33 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+            int height = -1, width = -1 ;
             Log.i("SCIR_Camera2BasicFrag", "ImageReader.OnImageAvailableListener onImageAvailable()");
 //            updateImageOnView(reader); // To Update View....
-            mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
+
+            Image image = reader.acquireNextImage();
+            height = image.getHeight() ; width = image.getWidth() ;
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            image.close();
+
+            updateImageOnView(bytes);
+            mBackgroundHandler.post(new ImageSaver(bytes, width, height));
         }
 
-        void updateImageOnView(ImageReader reader) {
+
+        public void updateImageOnView(final byte[] bytes) {
             Log.i("SCIR_Camera2BasicFrag", "ImageReader.OnImageAvailableListener updateImageOnView()");
-            Image image = reader.acquireNextImage();
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.capacity()];
-            buffer.get(bytes);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            mTextureImageView.setImageBitmap(bitmap);
+            runCodeOnMainThread( new Runnable () {
+                     @Override
+                     public void run() {
+                         final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                         mTextureImageView.setImageBitmap(bitmap);
+                     }
+                 }
+            );
         }
 
     };
@@ -394,6 +406,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                     + " SequenceID("+ sequenceId + ")frameNumber(" + frameNumber + ")"
                 );
             super.onCaptureSequenceCompleted(session, sequenceId, frameNumber);
+            configureViewForImageDisplay();
         }
 
         @Override
@@ -463,6 +476,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         mContextCamera2BasicFragment = camera2Activity.getApplicationContext();
         mCamera2Activity = camera2Activity;
         mRequestHandlerThread = requestHandlerThread ;
+
         return new Camera2BasicFragment();
     }
 
@@ -474,13 +488,53 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     }
 
     private ImageView mTextureImageView = null ;
+    private Button mButtonImageCaptureAndShow = null ;
+    private final static int STATE_VIEW_IMAGE_CAPTURE = 201 ;
+    private final static int STATE_VIEW_IMAGE_DISPLAY = 202 ;
+
+    private int mStateCameraView = STATE_VIEW_IMAGE_CAPTURE;
+
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onViewCreated()");
-        view.findViewById(R.id.picture).setOnClickListener(this);
-        view.findViewById(R.id.info).setOnClickListener(this);
-        mTextureImageView = (ImageView) view.findViewById(R.id.textureImageView);
+        view.findViewById(R.id.buttonCamera2BasicFragment_info).setOnClickListener(this);
+        mButtonImageCaptureAndShow = (Button)view.findViewById(R.id.buttonCapturePictureAndShow);
+        mButtonImageCaptureAndShow.setOnClickListener(this);
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+        mTextureImageView = (ImageView) view.findViewById(R.id.textureImageView);
+        configureViewForImageCapture();
+    }
+
+    private void configureViewForImageCapture() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                mButtonImageCaptureAndShow.setText("Capture Image for Reporting");
+                mTextureView.setVisibility(View.VISIBLE);
+                mTextureImageView.setVisibility(View.INVISIBLE);
+                mStateCameraView = STATE_VIEW_IMAGE_CAPTURE ;
+            }
+        };
+        runCodeOnMainThread(runnable);
+    }
+
+    protected void configureViewForImageDisplay() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                mButtonImageCaptureAndShow.setText("Recapture image for Reporting");
+                mTextureView.setVisibility(View.INVISIBLE);
+                mTextureImageView.setVisibility(View.VISIBLE);
+                mStateCameraView = STATE_VIEW_IMAGE_DISPLAY ;
+            }
+        };
+        runCodeOnMainThread(runnable);
+    }
+
+    private void runCodeOnMainThread(Runnable runnable) {
+        Context context = getActivity().getApplicationContext() ;
+        Handler mainHandler = new Handler(context.getMainLooper());
+        mainHandler.post(runnable);
     }
 
     @Override
@@ -890,10 +944,11 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.onCaptureComplete()");
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.onCaptureCompleted() posting");
                     showToast("Saved: " + mFile);
                     Log.d(TAG, mFile.toString());
                     unlockFocus();
+//                    configureViewForImageDisplay();
                 }
 
                 @Override
@@ -949,13 +1004,17 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onClick() -- ? Texture");
         switch (view.getId()) {
-            case R.id.picture: {
-                Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onClick() -> Picture button was clicked");
-                mMediaActionSound.play(MediaActionSound.SHUTTER_CLICK);
-                takePicture();
+            case R.id.buttonCapturePictureAndShow: {
+                Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onClick() -> Picture button was clicked (State:" + mStateCameraView);
+                if (mStateCameraView == STATE_VIEW_IMAGE_CAPTURE) {
+                    mMediaActionSound.play(MediaActionSound.SHUTTER_CLICK);
+                    takePicture();
+                } else {
+                    configureViewForImageCapture();
+                }
                 break;
             }
-            case R.id.info: {
+            case R.id.buttonCamera2BasicFragment_info: {
                 Activity activity = getActivity();
                 if (null != activity) {
                     new AlertDialog.Builder(activity)
@@ -974,57 +1033,28 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     private static class ImageSaver implements Runnable {
 
         /**
-         * The JPEG image
-         */
-        private final Image mImage;
-        /**
          * The file we save the image into.
          */
-        private final File mFile;
+        private Camera2BasicFragment sCamera2BasicFragment ;
+        private byte [] mBytes ;
+        private int mHeight = -1 , mWidth = -1 ;
 
-        public ImageSaver(Image image, File file) {
-            mImage = image;
-            mFile = file;
+        public ImageSaver(byte [] bytes, int width, int height) {
+            mBytes = bytes ;
+            mHeight = height;
+            mWidth = width;
         }
 
         @Override
         public void run() {
             Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment ImageSaver run()");
-            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
             try {
-                mCamera2Activity.setCameraData(bytes, mImage.getWidth(), mImage.getHeight());
+                mCamera2Activity.setCameraData(mBytes, mWidth, mHeight);
                 Log.i("SCIR_Camera2BasicFrag", "DONE: Camera2BasicFragment ImageSaver Content was posted to main Camera2Activity!!");
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                mImage.close();
             }
         }
-
-        public void oldRun() {
-            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-            FileOutputStream output = null;
-            try {
-                output = new FileOutputStream(mFile);
-                output.write(bytes);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                mImage.close();
-                if (null != output) {
-                    try {
-                        output.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
     }
 
     /**
