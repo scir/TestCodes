@@ -30,6 +30,7 @@ public class Camera2Activity extends Activity {
         mImageHeight = height ;
         mImageWidth = width ;
 
+        Log.i("SCIR_Camera2Activity", "Setting Camera Data in setCameraData()");
         if( ! sssPreferences.isStoreFullPicture()) {
             mScirDataInfraFeedbackPoint.appendScirReportDescription("Orig Size:("
                     + width + "X" + height + ")" );;
@@ -159,15 +160,6 @@ public class Camera2Activity extends Activity {
         mScirCtlProblemSeverityRating.setOnRatingBarChangeListener(mScirSeverityLevelRatingBarListener);
         mScirCtlButtonSubmitFeedback.setOnClickListener(mScirFeedbackButtonClickListener);
     }
-
-
-
-
-
-
-
-
-
 
 
 }

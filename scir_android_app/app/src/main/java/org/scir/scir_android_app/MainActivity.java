@@ -250,6 +250,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == START_INTENT_CAMERA) {
+            Log.i("MainActivity", "Camera Activity has been completed with result:" + resultCode);
             if (resultCode == RESULT_OK) {
                 // Recycle the previous bitmap.
                 if (mCameraBitmap != null) {
@@ -266,6 +267,13 @@ public class MainActivity extends Activity {
                 mCameraBitmap = null;
             }
         } else if( requestCode == START_INTENT_FEEDBACK_DATA) {
+            Log.i("MainActivity", "Feedback List Activity has been completed with result:" + resultCode);
+        } else if( requestCode == START_INTENT_LOCATION_ACTIVITY) {
+            Log.i("MainActivity", "Location Activity has been completed with result:" + resultCode);
+        } else if (requestCode == START_INTENT_PREFERENCES) {
+            Log.i("MainActivity", "Preference Activity has been completed with result:" + resultCode);
+        } else {
+            Log.i("MainActivity", "UNKNOWN?? Activity has been completed with result:" + resultCode);
         }
     }
 

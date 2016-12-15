@@ -23,12 +23,14 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -88,7 +90,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
     private static Context mContextCamera2BasicFragment = null ;
 
-
+    MediaActionSound mMediaActionSound = new MediaActionSound() ;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -136,21 +138,25 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
+            Log.i("SCIR_Camera2BasicFrag", "onSurfaceTextureAvailable()");
             openCamera(width, height);
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {
+            Log.i("SCIR_Camera2BasicFrag", "onSurfaceTextureChanged()");
             configureTransform(width, height);
         }
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture texture) {
+            Log.i("SCIR_Camera2BasicFrag", "onSurfaceTextureDestroyed()");
             return true;
         }
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture texture) {
+            Log.i("SCIR_Camera2BasicFrag", "onSurfaceTextureUpdated()");
         }
 
     };
@@ -188,6 +194,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             // This method is called when the camera is opened.  We start camera preview here.
+            Log.i("SCIR_Camera2BasicFrag", "CameraDevice.StateCallback onOpened()");
             mCameraOpenCloseLock.release();
             mCameraDevice = cameraDevice;
             createCameraPreviewSession();
@@ -195,6 +202,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraDevice.StateCallback Disconnected()");
             mCameraOpenCloseLock.release();
             cameraDevice.close();
             mCameraDevice = null;
@@ -202,6 +210,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void onError(@NonNull CameraDevice cameraDevice, int error) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraDevice.StateCallback onError()");
             mCameraOpenCloseLock.release();
             cameraDevice.close();
             mCameraDevice = null;
@@ -242,11 +251,13 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+            Log.i("SCIR_Camera2BasicFrag", "ImageReader.OnImageAvailableListener onImageAvailable()");
 //            updateImageOnView(reader); // To Update View....
             mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
         }
 
         void updateImageOnView(ImageReader reader) {
+            Log.i("SCIR_Camera2BasicFrag", "ImageReader.OnImageAvailableListener updateImageOnView()");
             Image image = reader.acquireNextImage();
             ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             byte[] bytes = new byte[buffer.capacity()];
@@ -286,14 +297,25 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
             = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() ");
             switch (mState) {
+                case STATE_PICTURE_TAKEN:
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state:STATE_PICTURE_TAKEN");
+                    break;
                 case STATE_PREVIEW: {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state:STATE_PREVIEW");
                     // We have nothing to do when the camera preview is working normally.
                     break;
                 }
                 case STATE_WAITING_LOCK: {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state:STATE_WAITING_LOCK");
                     Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == null) {
+                    if (afState == null
+                        || (CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN == afState)
+                        || (CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED == afState)
+                            ) {
+                        Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state: STATE_WAITING_LOCK, afState:NULL. Capture Still Picture()");
+//                        mState = STATE_PICTURE_TAKEN;
                         captureStillPicture();
                     } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
                             CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
@@ -302,14 +324,20 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                         if (aeState == null ||
                                 aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                             mState = STATE_PICTURE_TAKEN;
+                            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state: STATE_WAITING_LOCK, afState:Locked. Capture Still Picture()");
                             captureStillPicture();
+
                         } else {
+                            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state: STATE_WAITING_LOCK, afState:LOcked aeState:DOubtful? Capture Still Picture()");
                             runPrecaptureSequence();
                         }
+                    } else {
+                        Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state: STATE_WAITING_LOCK, afState:" + afState);
                     }
                     break;
                 }
                 case STATE_WAITING_PRECAPTURE: {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state:STATE_WAITING_PRECAPTURE");
                     // CONTROL_AE_STATE can be null on some devices
                     Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                     if (aeState == null ||
@@ -320,6 +348,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                     break;
                 }
                 case STATE_WAITING_NON_PRECAPTURE: {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback process() state:STATE_NON_PRECAPTURE");
                     // CONTROL_AE_STATE can be null on some devices
                     Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                     if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
@@ -335,6 +364,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         public void onCaptureProgressed(@NonNull CameraCaptureSession session,
                                         @NonNull CaptureRequest request,
                                         @NonNull CaptureResult partialResult) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCaptureProgressed()");
             process(partialResult);
         }
 
@@ -342,9 +372,37 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCaptureCompleted()");
             process(result);
         }
 
+        @Override
+        public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCaptureFailed()");
+            super.onCaptureFailed(session, request, failure);
+        }
+
+        @Override
+        public void onCaptureSequenceAborted(CameraCaptureSession session, int sequenceId) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCaptureSequenceAborted()");
+            super.onCaptureSequenceAborted(session, sequenceId);
+        }
+
+        @Override
+        public void onCaptureSequenceCompleted(CameraCaptureSession session, int sequenceId, long frameNumber) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCaptureSequenceCompleted()"
+                    + " SequenceID("+ sequenceId + ")frameNumber(" + frameNumber + ")"
+                );
+            super.onCaptureSequenceCompleted(session, sequenceId, frameNumber);
+        }
+
+        @Override
+        public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCaptureStarted() : "
+                    + " Timestamp("+ timestamp + ")frameNumber(" + frameNumber + ")"
+            );
+            super.onCaptureStarted(session, request, timestamp, frameNumber);
+        }
     };
 
     /**
@@ -375,7 +433,8 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * @param aspectRatio The aspect ratio
      * @return The optimal {@code Size}, or an arbitrary one if none were big enough
      */
-    private static Size chooseOptimalSize(Size[] choices, int width, int height, Size aspectRatio) {
+    private static Size chooseOptimalSize   (Size[] choices, int width, int height, Size aspectRatio) {
+        Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback onCompleted()");
         // Collect the supported resolutions that are at least as big as the preview Surface
         List<Size> bigEnough = new ArrayList<>();
         int w = aspectRatio.getWidth();
@@ -400,6 +459,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     private static Camera2Activity mCamera2Activity = null ;
 
     public static Camera2BasicFragment newInstance(Camera2Activity camera2Activity, RequestHandlerThread requestHandlerThread) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment newInstance()");
         mContextCamera2BasicFragment = camera2Activity.getApplicationContext();
         mCamera2Activity = camera2Activity;
         mRequestHandlerThread = requestHandlerThread ;
@@ -409,12 +469,14 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onCreateView()");
         return inflater.inflate(R.layout.fragment_camera2_basic, container, false);
     }
 
     private ImageView mTextureImageView = null ;
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onViewCreated()");
         view.findViewById(R.id.picture).setOnClickListener(this);
         view.findViewById(R.id.info).setOnClickListener(this);
         mTextureImageView = (ImageView) view.findViewById(R.id.textureImageView);
@@ -423,12 +485,14 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onActivityCreated()");
         super.onActivityCreated(savedInstanceState);
         mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
     }
 
     @Override
     public void onResume() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onResume()");
         super.onResume();
         startBackgroundThread();
 
@@ -445,12 +509,14 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onPause() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onPause()");
         closeCamera();
         stopBackgroundThread();
         super.onPause();
     }
 
     private void requestCameraPermission() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment reuqestCameraPermission()");
         if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
             new ConfirmationDialog().show(getChildFragmentManager(), FRAGMENT_DIALOG);
         } else {
@@ -462,6 +528,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onRequestPermissionResult()");
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
             if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 ErrorDialog.newInstance(getString(R.string.request_permission))
@@ -473,6 +540,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     }
 
     private Size chooseSizeConfiguration(Size [] sizes) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment choseSizeConfiguration()");
         SssPreferences sssPreferences = SssPreferences.getSssPreferences();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
@@ -508,6 +576,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * @param height The height of available size for camera preview
      */
     private void setUpCameraOutputs(int width, int height) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment setupCameraOutputs()");
         Activity activity = getActivity();
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
         try {
@@ -571,6 +640,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Opens the camera specified by {@link Camera2BasicFragment#mCameraId}.
      */
     private void openCamera(int width, int height) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment openCamera()");
         if(ActivityCompat.checkSelfPermission(mContextCamera2BasicFragment, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
@@ -596,6 +666,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Closes the current {@link CameraDevice}.
      */
     private void closeCamera() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment closeCamera()");
         try {
             mCameraOpenCloseLock.acquire();
             if (null != mCaptureSession) {
@@ -621,6 +692,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Starts a background thread and its {@link Handler}.
      */
     private void startBackgroundThread() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment startBackgroundThread()");
         mBackgroundThread = new HandlerThread("CameraBackground");
         mBackgroundThread.start();
         mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
@@ -630,6 +702,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Stops the background thread and its {@link Handler}.
      */
     private void stopBackgroundThread() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment stopBackgroundThread()");
         mBackgroundThread.quitSafely();
         try {
             mBackgroundThread.join();
@@ -644,6 +717,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Creates a new {@link CameraCaptureSession} for camera preview.
      */
     private void createCameraPreviewSession() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment createCameraPreviewSession()");
         try {
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
@@ -710,6 +784,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * @param viewHeight The height of `mTextureView`
      */
     private void configureTransform(int viewWidth, int viewHeight) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment configureTransform()");
         Activity activity = getActivity();
         if (null == mTextureView || null == mPreviewSize || null == activity) {
             return;
@@ -738,13 +813,16 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * Initiate a still image capture.
      */
     private void takePicture() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment takePicture()");
         lockFocus();
+
     }
 
     /**
      * Lock the focus as the first step for a still image capture.
      */
     private void lockFocus() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment lockFocus()");
         try {
             // This is how to tell the camera to lock focus.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
@@ -764,6 +842,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * we get a response in {@link #mCaptureCallback} from {@link #lockFocus()}.
      */
     private void runPrecaptureSequence() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment runPrecaptureSequence()");
         try {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
@@ -782,6 +861,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * {@link #mCaptureCallback} from both {@link #lockFocus()}.
      */
     private void captureStillPicture() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment captureStillPicture()");
         try {
             final Activity activity = getActivity();
             if (null == activity || null == mCameraDevice) {
@@ -802,6 +882,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
             int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
 
+            Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.capture() being Programmed");
             CameraCaptureSession.CaptureCallback CaptureCallback
                     = new CameraCaptureSession.CaptureCallback() {
 
@@ -809,9 +890,28 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.onCaptureComplete()");
                     showToast("Saved: " + mFile);
                     Log.d(TAG, mFile.toString());
                     unlockFocus();
+                }
+
+                @Override
+                public void onCaptureSequenceCompleted(CameraCaptureSession session, int sequenceId, long frameNumber) {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.onCaptureSequenceCompleted()");
+                    super.onCaptureSequenceCompleted(session, sequenceId, frameNumber);
+                }
+
+                @Override
+                public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.onCaptureFailed()");
+                    super.onCaptureFailed(session, request, failure);
+                }
+
+                @Override
+                public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
+                    Log.i("SCIR_Camera2BasicFrag", "CameraCaptureSession.CaptureCallback.onCaptureProgressed()");
+                    super.onCaptureProgressed(session, request, partialResult);
                 }
             };
 
@@ -827,6 +927,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
      * finished.
      */
     private void unlockFocus() {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment unlockFocus()");
         try {
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
@@ -846,8 +947,11 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onClick(View view) {
+        Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onClick() -- ? Texture");
         switch (view.getId()) {
             case R.id.picture: {
+                Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onClick() -> Picture button was clicked");
+                mMediaActionSound.play(MediaActionSound.SHUTTER_CLICK);
                 takePicture();
                 break;
             }
@@ -885,11 +989,13 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void run() {
+            Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment ImageSaver run()");
             ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             try {
                 mCamera2Activity.setCameraData(bytes, mImage.getWidth(), mImage.getHeight());
+                Log.i("SCIR_Camera2BasicFrag", "DONE: Camera2BasicFragment ImageSaver Content was posted to main Camera2Activity!!");
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -928,6 +1034,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public int compare(Size lhs, Size rhs) {
+            Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment compare()");
             // We cast here to ensure the multiplications won't overflow
             return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
                     (long) rhs.getWidth() * rhs.getHeight());
@@ -943,6 +1050,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
         private static final String ARG_MESSAGE = "message";
 
         public static ErrorDialog newInstance(String message) {
+            Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment ErrorDialog newInstance()");
             ErrorDialog dialog = new ErrorDialog();
             Bundle args = new Bundle();
             args.putString(ARG_MESSAGE, message);
@@ -952,6 +1060,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment ErrorDialog onCreateDialog()");
             final Activity activity;
             activity = getActivity();
             return new AlertDialog.Builder(activity)
@@ -974,6 +1083,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment ConfirmationDialog onCreateDialog()");
             final Fragment parent = getParentFragment();
             return new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.request_permission)

@@ -4,23 +4,26 @@
     android:layout_height="match_parent">
     <org.sss.library.camera.AutoFitTextureView
         android:id="@+id/texture"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
     <ImageView
         android:id="@+id/textureImageView"
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
+        android:src="@drawable/common_google_signin_btn_text_light"
+        android:layout_gravity="right"
         android:layout_toRightOf="@id/texture"
         />
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@id/texture"
-        android:background="#4285f4">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="left"
+            android:layout_above="@id/texture"
+            android:background="#4285f4">
         <Button
             android:id="@+id/picture"
             android:layout_width="wrap_content"
