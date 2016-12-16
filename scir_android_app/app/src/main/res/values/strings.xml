@@ -20,12 +20,12 @@
     <string name="title_activity_check_location">CheckLocationActivity</string>
     <string name="exit">Exit</string>
 
-    <string name="strScirBuildName">2016-12-07_17:00</string>
+    <string name="strScirBuildName">2016-12-16_17:34</string>
     <string name="strSmartCityView">Smart City View</string>
     <string name="strSmartCityLogo">Smart City Logo</string>
 
     <string name="strTextViewGeoLocationStatus">Wait... Fetching Location</string>
-    <string name="strTextViewGeoLocationStatusDone">Geo Location Updated! Proceed with Capture...</string>
+    <string name="strTextViewGeoLocationStatusDone">Geo Location Updated! Proceed with Report Problem...</string>
 
     <string name="pause">Pause Location Updates</string>
     <string name="resume">Resume Location Updates</string>

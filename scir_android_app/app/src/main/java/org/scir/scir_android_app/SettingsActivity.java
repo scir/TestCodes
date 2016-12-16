@@ -297,7 +297,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             if(key.equals("scir_cb_SaveFullImage")) {
                 String flagValue = sharedPreferences.getString("scir_cb_SaveFullImage", "true");
-                boolean bSaveFullImage = Boolean.parseBoolean(flagValue);
+                boolean bSaveFullImage = Boolean.getBoolean(flagValue);
                 sssPreferences.setFlagStoreFullPicture(bSaveFullImage);
             } else if (key.equals("user_image_width_size")) {
                 // Case to update all size parameters

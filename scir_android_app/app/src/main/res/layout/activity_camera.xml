@@ -42,48 +42,100 @@ android:orientation="vertical" >
     </LinearLayout>
 
 
-        <LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_weight="20"
+        android:layout_marginTop="@dimen/scir_activity_vertical_margin"
         android:gravity="center"
         android:orientation="vertical"
-            android:layout_gravity="center">
-
+        android:layout_gravity="center">
 
         <RadioGroup
-                android:id="@+id/scirCtrlRadioGroupProblemType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="17dp" >
+            android:id="@+id/scirCtrlRadioGroupProblemType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:weightSum="90"
+            android:layout_marginTop="0dp"
+            >
 
-                <RadioButton
-                    android:id="@+id/scirCtrlRadioSelectElectricity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:checked="false"
-                    android:text="Electricity" />
-
-                <RadioButton
-                    android:id="@+id/scirCtrlRadioSelectWater"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="Water" />
+            <LinearLayout
+                android:layout_weight="3"
+                android:weightSum="3"
+                android:gravity="center_vertical|left"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <RadioButton
                     android:id="@+id/scirCtrlRadioSelectRoad"
+                    android:gravity="center_vertical|left"
+                    android:checked="false"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Road" />
 
                 <RadioButton
-                    android:id="@+id/scirCtrlRadioSelectPollution"
+                    android:id="@+id/scirCtrlRadioSelectSanitation"
+                    android:gravity="center_vertical|left"
+                    android:checked="false"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="Pollution" />
-            </RadioGroup>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sanitation" />
+
+                <RadioButton
+                    android:id="@+id/scirCtrlRadioSelectWater"
+                    android:gravity="center_vertical|left"
+                    android:checked="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Water" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:weightSum="3"
+                android:gravity="center_vertical|left"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RadioButton
+                    android:id="@+id/scirCtrlRadioSelectElectricity"
+                    android:gravity="center_vertical|left"
+                    android:checked="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Electricity" />
+
+                <RadioButton
+                    android:id="@+id/scirCtrlRadioSelectMissingKid"
+                    android:gravity="center_vertical|left"
+                    android:checked="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Missing Kids" />
+
+                <RadioButton
+                    android:id="@+id/scirCtrlRadioSelectOthers"
+                    android:gravity="center_vertical|left"
+                    android:checked="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Others" />
+            </LinearLayout>
+
+        </RadioGroup>
+
+
     </LinearLayout>
+
+
 
     <RatingBar
         android:id="@+id/scirCtrlRatingBar"

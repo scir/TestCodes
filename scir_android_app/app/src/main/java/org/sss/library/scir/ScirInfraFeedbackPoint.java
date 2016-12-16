@@ -1,6 +1,5 @@
 package org.sss.library.scir;
 
-import android.database.sqlite.SQLiteOpenHelper;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -22,21 +21,25 @@ public class ScirInfraFeedbackPoint {
 
     public enum SCIR_TICKET_SEVERITY {
         INVALID,
-        NoProblem,
-        Low,
-        Normal,
-        High,
-        Urgent
+        NoProblem,              // <= 1.0
+        LowSeverityProblem,     // >= 1.0
+        SlightProblem,          // >= 2.0
+        Problem,                // >= 3.0
+        PressingProblem,        // >= 3.6
+        HighSeverityProblem,    // >= 4.2
+        UrgentProblem           // >= 4.7
     }
     public enum SCIR_PROBLEM_TYPE {
         None,
+        Other,
         Electricity,
+        MissingKid,
+        Pollution,
+        PublicPlaces,
         Road,
-        Sanitation,
-        Water,
-        Sewage,
-        //        Sanitation,
-        Other
+        Sanitation,        // Sewage,
+        Traffic,
+        Water
     }
 
 
@@ -90,8 +93,8 @@ public class ScirInfraFeedbackPoint {
 
     public void setScirInfraFeedback(double mScirDataLat, double mScirDataLong, long mScirDataDateTime,
                                      byte []mScirDataCameraImage, byte []mScirDataCameraCompressedImage,
-                                     SCIR_PROBLEM_TYPE mScirDataProblemType,
-                                     SCIR_TICKET_SEVERITY mScirDataProblemSeverityLevel,
+                                     SCIR_PROBLEM_TYPE scirDataProblemType,
+                                     SCIR_TICKET_SEVERITY scirDataProblemSeverityLevel,
                                      String mScirDataMobileNumber, String mScirDataDeviceId,
                                      String scirImageDimension,
                                      String mScirDataFeedbackDescription, String mScirDataReportId)
@@ -104,8 +107,8 @@ public class ScirInfraFeedbackPoint {
         this.mScirDataCameraCompressedImage = mScirDataCameraCompressedImage ;
         this.mScirImageDimension = scirImageDimension ;
 
-        this.mScirDataProblemSeverityLevel = mScirDataProblemSeverityLevel;
-        this.mScirDataProblemType = mScirDataProblemType;
+        this.mScirDataProblemSeverityLevel = scirDataProblemSeverityLevel;
+        this.mScirDataProblemType = scirDataProblemType;
 
         this.mScirDataMobileNumber = mScirDataMobileNumber;
         this.mScirDataDeviceId = mScirDataDeviceId;
@@ -137,35 +140,67 @@ public class ScirInfraFeedbackPoint {
     }
 
 
+    /*
+     *
+     *
+        NoProblem,              // <= 1.0
+        LowSeverityProblem,     // >= 1.0
+        SlightProblem,          // >= 2.0
+        Problem,                // >= 3.0
+        PressingProblem,        // >= 3.6
+        HighSeverityProblem,    // >= 4.2
+        UrgentProblem           // >= 4.7
+        INVALID                 // > 5.0
+
+     */
     public void setScirDataProblemSeverityLevel(float rating) {
-        if( rating < 1.0) {
-            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.NoProblem ;
-        } else if( rating <= 2.0) {
-            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.Low;
-        } else if (rating <= 3.0) {
-            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.Normal;
-        } else if (rating <= 4.0 ) {
-            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.High;
-        } else if (rating <= 5.0 ) {
-            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.Urgent;
+        if( rating > 5 ) {
+            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.INVALID ;
+        } else if (rating >= 4.6  ) {
+            mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.UrgentProblem;
+        } else if (rating >= 4.0 ) {
+            mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.HighSeverityProblem;
+        } else if (rating >= 3.5) {
+            mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.PressingProblem;
+        } else if (rating >= 3.0) {
+            mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.Problem;
+        } else if( rating >= 2.0) {
+            mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.SlightProblem;
+        } else if( rating >= 1.0) {
+            mScirDataProblemSeverityLevel = SCIR_TICKET_SEVERITY.LowSeverityProblem;
+        } else if( rating >= 0 ) {
+            mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.NoProblem;
         } else {
             mScirDataProblemSeverityLevel = ScirInfraFeedbackPoint.SCIR_TICKET_SEVERITY.INVALID ;
         }
     }
     public void setScirDataProblemType(int checkedId) {
         switch (checkedId) {
+            case R.id.scirCtrlRadioSelectRoad:
+                mScirDataProblemType = SCIR_PROBLEM_TYPE.Road;
+                break;
             case R.id.scirCtrlRadioSelectElectricity:
                 mScirDataProblemType = SCIR_PROBLEM_TYPE.Electricity;
                 break;
             case R.id.scirCtrlRadioSelectWater:
                 mScirDataProblemType = SCIR_PROBLEM_TYPE.Water;
                 break;
+            case R.id.scirCtrlRadioSelectSanitation:
+                mScirDataProblemType = SCIR_PROBLEM_TYPE.Sanitation;
+                break;
+            case R.id.scirCtrlRadioSelectMissingKid:
+                mScirDataProblemType = SCIR_PROBLEM_TYPE.MissingKid;
+                break;
             case R.id.scirCtrlRadioSelectPollution:
-                mScirDataProblemType = SCIR_PROBLEM_TYPE.Sewage;
+                mScirDataProblemType = SCIR_PROBLEM_TYPE.Pollution;
                 break;
-            case R.id.scirCtrlRadioSelectRoad:
-                mScirDataProblemType = SCIR_PROBLEM_TYPE.Road;
+            case R.id.scirCtrlRadioSelectPublicPlaces:
+                mScirDataProblemType = SCIR_PROBLEM_TYPE.PublicPlaces;
                 break;
+            case R.id.scirCtrlRadioSelectTraffic:
+                mScirDataProblemType = SCIR_PROBLEM_TYPE.Traffic;
+                break;
+            case R.id.scirCtrlRadioSelectOthers:
             default:
                 mScirDataProblemType = SCIR_PROBLEM_TYPE.Other;
                 break;

@@ -11,16 +11,22 @@ android:orientation="vertical"
 tools:context="org.scir.scir_android_app.MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/app_name"
+        android:gravity="center"
+        android:background="#3333CC"
+        android:textColor="#FFFFFF"
         android:id="@+id/textViewTitle"
         android:layout_gravity="center_horizontal" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="#888888"
+        android:textColor="#CC0000"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/strTextViewGeoLocationStatus"
         android:id="@+id/textViewGeoLocationStatus"
@@ -50,56 +56,45 @@ tools:context="org.scir.scir_android_app.MainActivity">
         android:id="@+id/imageView"
         android:contentDescription="@string/strSmartCityView" />
 
-
-    <!--
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageView" />
-
-        <ImageView
-        android:id="@+id/camera_image_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-    -->
-
-
     <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    android:orientation="horizontal"
+    android:layout_marginTop="@dimen/scir_activity_horizontal_margin"
+    android:weightSum="40"
+    android:orientation="vertical"
     android:gravity="center" >
 
-    <Button
-        android:id="@+id/capture_infra_problem_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="@string/str_btn_report_infra_problems"
-        android:background="#4e62ab"
-        android:textColor="#c02020"
-        android:textStyle="bold" />
+        <Button
+            android:id="@+id/capture_infra_problem_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:text="@string/str_btn_report_infra_problems"
+            android:textColor="#A08080"
+            android:textStyle="bold" />
+        <!--android:background="#4e62ab"-->
 
-    <Button
-        android:id="@+id/check_problems_reported_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="@string/str_btn_view_problems_reported"
-        android:background="#875252"
-        android:textColor="#000000"
-        android:textStyle="bold" />
+        <Button
+            android:id="@+id/check_problems_reported_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_btn_view_problems_reported"
+            android:layout_weight="10"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+        <!--android:background="#875252"-->
+        <Button
+            android:id="@+id/check_location_services_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:text="@string/str_btn_view_location_services"
+            android:textStyle="bold" />
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:textColor="#000000"-->
+        <!--android:background="#875252"-->
 
 
     </LinearLayout>
-    <Button
-        android:id="@+id/check_location_services_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/str_btn_view_location_services"
-        android:background="#875252"
-        android:textColor="#000000"
-        android:textStyle="bold" />
 
 </LinearLayout>

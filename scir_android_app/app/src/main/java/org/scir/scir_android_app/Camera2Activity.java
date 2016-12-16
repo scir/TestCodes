@@ -7,6 +7,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.Toast;
@@ -130,9 +131,23 @@ public class Camera2Activity extends Activity {
     private RadioGroup.OnCheckedChangeListener mScirProblemTypeGroupChangeListener = new RadioGroup.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
+            group.clearCheck();
             mScirDataInfraFeedbackPoint.setScirDataProblemType(checkedId);
+            group.check(checkedId);
         }
     };
+
+    private int mLastProblemTypeSetting = -1 ;
+    RadioButton mLastRadioButton = null ;
+    public void updateProblemTypeRadioButton(View view) {
+        if( (mLastProblemTypeSetting != -1 ) && (mLastRadioButton != null)) {
+            mLastRadioButton.setChecked(false);
+        }
+        mLastRadioButton = (RadioButton) view ;
+        mLastProblemTypeSetting = mLastRadioButton.getId();
+        mScirDataInfraFeedbackPoint.setScirDataProblemType(mLastProblemTypeSetting);
+        mLastRadioButton.setChecked(true);
+    }
 
     private RatingBar.OnRatingBarChangeListener mScirSeverityLevelRatingBarListener = new RatingBar.OnRatingBarChangeListener() {
         @Override
