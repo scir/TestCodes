@@ -10,25 +10,29 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="7"
+        android:layout_weight="5"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:text="@string/capturing_image"   />
 
+    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--xmlns:tools="http://schemas.android.com/tools"-->
+        <!--android:id="@+id/container"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="300dp"-->
+        <!--android:background="#000"-->
+        <!--tools:context=".Camera2Activity" />-->
 
-    <!--<SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--android:id="@+id/mainSurfaceView"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_width="fill_parent"-->
-    <!--android:onClick="onClickOnSurfaceView"-->
-    <!--/>-->
-
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout
+        android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="#000"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="50"
+        android:background="#CCDDCC"
         tools:context=".Camera2Activity" />
-    <!-- To also try out .Camera2Activity .Camera2BasicFragment-->
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -77,7 +81,7 @@
     <RatingBar
         android:id="@+id/scirCtrlRatingBar"
         android:layout_width="match_parent"
-        android:layout_weight="2"
+        android:layout_weight="5"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         style="@style/Widget.AppCompat.ImageButton" />
@@ -85,7 +89,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
+        android:layout_weight="5"
         android:gravity="center"
         android:orientation="horizontal"
         android:weightSum="1">
