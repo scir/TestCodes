@@ -90,7 +90,7 @@ android:orientation="vertical" >
         android:layout_width="264dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        style="@style/Widget.AppCompat.ImageButton" />
+        />
 
     <!--
     <SeekBar

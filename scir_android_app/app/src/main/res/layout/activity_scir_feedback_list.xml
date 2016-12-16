@@ -21,8 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/btnResubmitAllPendingFeedbacks"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:capitalize="none" />
+        />
 
 
     <ListView android:id="@+id/listView1" android:layout_width="fill_parent"

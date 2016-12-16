@@ -14,14 +14,6 @@
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:text="@string/capturing_image"   />
 
-    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--xmlns:tools="http://schemas.android.com/tools"-->
-        <!--android:id="@+id/container"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="300dp"-->
-        <!--android:background="#000"-->
-        <!--tools:context=".Camera2Activity" />-->
-
     <FrameLayout
         android:orientation="vertical"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,7 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="50"
-        android:background="#CCDDCC"
+        android:layout_gravity="fill"
+        android:background="#888888"
         tools:context=".Camera2Activity" />
 
 
@@ -47,7 +40,6 @@
             android:id="@+id/scirCtrlRadioGroupProblemType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="10"
             android:orientation="horizontal"
             >
 
@@ -84,7 +76,7 @@
         android:layout_weight="5"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        style="@style/Widget.AppCompat.ImageButton" />
+        />
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -55,8 +55,6 @@ import org.sss.library.SssPreferences;
 import org.sss.library.handler.RequestHandlerThread;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -497,10 +495,10 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         Log.i("SCIR_Camera2BasicFrag", "Camera2BasicFragment onViewCreated()");
-        view.findViewById(R.id.buttonCamera2BasicFragment_info).setOnClickListener(this);
+//        view.findViewById(R.id.buttonCamera2BasicFragment_info).setOnClickListener(this);
         mButtonImageCaptureAndShow = (Button)view.findViewById(R.id.buttonCapturePictureAndShow);
         mButtonImageCaptureAndShow.setOnClickListener(this);
-        mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+        mTextureView = (AutoFitTextureView) view.findViewById(R.id.textureCameraView);
         mTextureImageView = (ImageView) view.findViewById(R.id.textureImageView);
         configureViewForImageCapture();
     }
@@ -1014,6 +1012,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                 }
                 break;
             }
+            /*
             case R.id.buttonCamera2BasicFragment_info: {
                 Activity activity = getActivity();
                 if (null != activity) {
@@ -1024,6 +1023,7 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                 }
                 break;
             }
+                */
         }
     }
 

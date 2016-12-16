@@ -4,21 +4,28 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     >
-    <!--android:background="#99CCCC"-->
 
     <org.sss.library.camera.AutoFitTextureView
-        android:id="@+id/texture"
+        android:id="@+id/textureCameraView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:gravity="center|fill"
+        android:gravity="center"
         android:visibility="visible"
         />
+    <!--android:layout_alignParentStart="true"-->
+    <!--<ImageView-->
+        <!--android:id="@+id/imageViewLogo"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:src="@drawable/ic_launcher_sws"-->
+        <!--android:layout_alignRight="@+id/textureCameraView"-->
+        <!--android:visibility="invisible"-->
+        <!--/>-->
     <ImageView
         android:id="@+id/textureImageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_gravity="center_vertical|right"
         android:visibility="invisible"
         />
 
@@ -28,7 +35,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             android:layout_gravity="center"
-            android:layout_above="@id/texture"
+            android:layout_above="@id/textureCameraView"
             android:background="#4285f4">
         <Button
             android:id="@+id/buttonCapturePictureAndShow"
@@ -36,14 +43,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/picture" />
-        <ImageButton
-            android:id="@+id/buttonCamera2BasicFragment_info"
-            android:contentDescription="@string/description_info"
-            style="@android:style/Widget.Material.Light.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
-            android:src="@drawable/ic_action_info" />
+        <!--<ImageButton-->
+            <!--android:id="@+id/buttonCamera2BasicFragment_info"-->
+            <!--android:contentDescription="@string/description_info"-->
+            <!--style="@android:style/Widget.Material.Light.Button.Borderless"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_vertical|right"-->
+            <!--android:visibility="visible"-->
+            <!--android:src="@drawable/ic_action_info" />-->
     </FrameLayout>
 </RelativeLayout>
 
